@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="dashboard">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- En-tête -->
+            <div class="page-header page-header-dashboard">
+                <div class="page-header-left">
+                    <h1>Tableau de bord</h1>
+                </div>
+                <div class="page-header-right">
+                    <div class="dashboard-period" role="group" aria-label="Période affichée">
+                        <a href="dashboard.html?period=day" class="btn btn-text btn-period">Aujourd'hui</a>
+                        <a href="dashboard.html?period=week" class="btn btn-text btn-period">Cette semaine</a>
+                        <a href="dashboard.html?period=month" class="btn btn-primary btn-period btn-period-active">Ce mois</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicateurs -->
+            <section class="stats-grid stats-grid-dashboard" aria-label="Indicateurs">
+                <a href="tickets.html" class="stat-card stat-card-blue stat-card-link role-admin-collaborateur" title="Voir la liste des tickets ouverts">
+                    <span class="stat-icon" aria-hidden="true">🎫</span>
+                    <div class="stat-content">
+                        <div class="stat-value-wrap">
+                            <span class="stat-value">—</span>
+                            <span class="stat-trend stat-trend-neutral" title="vs mois dernier">—</span>
+                        </div>
+                        <div class="stat-label">Tickets ouverts</div>
+                        <span class="stat-card-detail">Voir le détail →</span>
+                    </div>
+                </a>
+                <a href="projets.html" class="stat-card stat-card-orange stat-card-link" title="Voir les projets actifs">
+                    <span class="stat-icon" aria-hidden="true">📁</span>
+                    <div class="stat-content">
+                        <div class="stat-value-wrap">
+                            <span class="stat-value">—</span>
+                            <span class="stat-trend stat-trend-neutral">—</span>
+                        </div>
+                        <div class="stat-label">Projets actifs</div>
+                        <span class="stat-card-detail">Voir le détail →</span>
+                    </div>
+                </a>
+                <a href="ticket-validation.html" class="stat-card stat-card-green stat-card-link" title="Voir les tickets à valider">
+                    <span class="stat-icon" aria-hidden="true">✅</span>
+                    <div class="stat-content">
+                        <div class="stat-value-wrap">
+                            <span class="stat-value">12</span>
+                            <span class="stat-trend stat-trend-up">+3</span>
+                        </div>
+                        <div class="stat-label">À valider ce mois</div>
+                        <span class="stat-card-detail">Voir le détail →</span>
+                    </div>
+                </a>
+                <a href="temps.html" class="stat-card stat-card-purple stat-card-link role-admin-collaborateur" title="Voir le suivi des heures">
+                    <span class="stat-icon" aria-hidden="true">⏱️</span>
+                    <div class="stat-content">
+                        <div class="stat-value-wrap">
+                            <span class="stat-value">—</span>
+                            <span class="stat-trend stat-trend-neutral">—</span>
+                        </div>
+                        <div class="stat-label">Heures ce mois</div>
+                        <span class="stat-card-detail">Voir le détail →</span>
+                    </div>
+                </a>
+            </section>
+
+            <!-- Graphiques -->
+            <section class="dashboard-widgets">
+                <div class="widget-grid widget-grid-2">
+                    <article class="widget-card role-admin-collaborateur">
+                        <header class="widget-header">
+                            <h2>Répartition des tickets par statut</h2>
+                            <a href="tickets.html" class="link">Voir tout</a>
+                        </header>
+                        <div class="widget-content">
+                            <div class="dashboard-chart-bars">
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label">Nouveau</span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-gray" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">—</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label">En cours</span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-gray" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">—</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label">Terminé</span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-gray" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">—</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label">À valider</span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-gray" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">—</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label">Validé / Refusé</span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-gray" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="widget-card role-admin-collaborateur">
+                        <header class="widget-header">
+                            <h2>Heures par projet (ce mois)</h2>
+                            <a href="rapports.html" class="link role-admin-only">Rapports</a>
+                        </header>
+                        <div class="widget-content">
+                            <div class="dashboard-chart-bars">
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label"><a href="projet-detail.html">Site e-commerce</a></span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-primary" style="width: 65%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">92h</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label"><a href="projet-detail.html">Application mobile</a></span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-blue" style="width: 28%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">40h</span>
+                                </div>
+                                <div class="dashboard-chart-row">
+                                    <span class="dashboard-chart-label"><a href="projet-detail.html">Refonte site</a></span>
+                                    <div class="dashboard-chart-bar-wrap">
+                                        <div class="dashboard-chart-bar dashboard-chart-bar-green" style="width: 7%;"></div>
+                                    </div>
+                                    <span class="dashboard-chart-value">10h</span>
+                                </div>
+                            </div>
+                            <p class="dashboard-chart-total"><strong>Total : 142h</strong> sur 200h prévus</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Tickets récents -->
+            <section class="dashboard-widgets">
+                <div class="widget-grid widget-grid-2">
+                    <article class="widget-card role-admin-collaborateur">
+                        <header class="widget-header">
+                            <h2>Tickets récents</h2>
+                            <a href="tickets.html" class="link" data-tooltip="Voir tous les tickets">Voir tout</a>
+                        </header>
+                        <div class="widget-content">
+                            <table class="table table-compact">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Titre</th>
+                                        <th>Statut</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" class="table-empty">Aucun ticket récent.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="widget-card role-admin-collaborateur">
+                        <header class="widget-header">
+                            <h2>Enveloppe heures (ce mois)</h2>
+                        </header>
+                        <div class="widget-content">
+                            <div class="dashboard-gauge">
+                                <div class="dashboard-gauge-value">— <span class="text-secondary">/ —</span></div>
+                                <div class="progress-bar progress-bar-lg mt-md">
+                                    <div class="progress-fill progress-fill-primary" style="width: 0%;"></div>
+                                </div>
+                                <p class="progress-text mt-sm">—</p>
+                            </div>
+                            <div class="dashboard-gauge-legend">
+                                <span class="dashboard-gauge-legend-item"><em class="legend-dot legend-primary"></em> Consommées</span>
+                                <span class="dashboard-gauge-legend-item"><em class="legend-dot legend-bg"></em> Disponibles</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Activité -->
+            <section class="dashboard-widgets">
+                <div class="widget-grid widget-grid-2">
+                    <article class="widget-card">
+                        <header class="widget-header">
+                            <h2>Activité récente</h2>
+                            <a href="rapports.html" class="link role-admin-only">Voir tout</a>
+                        </header>
+                        <div class="widget-content">
+                            <ul class="dashboard-activity" aria-label="Dernières activités">
+                                <li class="dashboard-activity-item">
+                                    <span class="dashboard-activity-icon dashboard-activity-icon-time" aria-hidden="true">⏱️</span>
+                                    <div class="dashboard-activity-content">
+                                        <p>—</p>
+                                        <time class="dashboard-activity-time">—</time>
+                                    </div>
+                                </li>
+                            </ul>
+                            <p class="text-secondary text-sm">Aucune activité récente.</p>
+                        </div>
+                    </article>
+
+                    <article class="widget-card">
+                        <header class="widget-header">
+                            <h2>Projets à la une</h2>
+                            <a href="projets.html" class="link">Tous les projets</a>
+                        </header>
+                        <div class="widget-content">
+                            <ul class="dashboard-projects">
+                                <li class="dashboard-project-item">
+                                    <div class="dashboard-project-info">
+                                        <span class="dashboard-project-name">—</span>
+                                        <span class="dashboard-project-meta">—</span>
+                                    </div>
+                                </li>
+                            </ul>
+                            <p class="text-secondary text-sm">Aucun projet.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

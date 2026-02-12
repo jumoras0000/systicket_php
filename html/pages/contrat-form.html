@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un contrat - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="contrats">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- Navigation -->
+            <nav class="breadcrumb">
+                <a href="dashboard.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="contrats.html">Contrats</a>
+                <span class="breadcrumb-separator">/</span>
+                <span>Nouveau contrat</span>
+            </nav>
+
+            <!-- En-tête -->
+            <div class="page-header">
+                <h1>Créer un contrat</h1>
+                <p class="page-subtitle">Définir l'enveloppe d'heures et le taux horaire pour un projet</p>
+            </div>
+
+            <!-- Formulaire -->
+            <section class="form-section card">
+                <form id="contrat-form" action="contrats.html" method="get">
+                    <div class="form-messages" role="alert" aria-live="polite"></div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="contrat-project" class="form-label">Projet <span class="required">*</span></label>
+                            <select id="contrat-project" name="project" class="form-select" required>
+                                <option value="">Sélectionner un projet</option>
+                                <option value="1">Site e-commerce</option>
+                                <option value="2">Application mobile</option>
+                                <option value="3">Refonte site vitrine</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contrat-client" class="form-label">Client <span class="required">*</span></label>
+                            <select id="contrat-client" name="client" class="form-select" required>
+                                <option value="">Sélectionner un client</option>
+                                <option value="1">Acme Corp</option>
+                                <option value="2">Tech Solutions</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="contrat-hours" class="form-label">Heures incluses <span class="required">*</span></label>
+                            <input type="number" id="contrat-hours" name="hours" class="form-input" min="1" placeholder="" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contrat-rate" class="form-label">Taux horaire (€/h) <span class="required">*</span></label>
+                            <input type="number" id="contrat-rate" name="rate" class="form-input" min="0" step="0.01" placeholder="" required>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="contrat-start" class="form-label">Date de début <span class="required">*</span></label>
+                            <input type="date" id="contrat-start" name="start" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contrat-end" class="form-label">Date de fin <span class="required">*</span></label>
+                            <input type="date" id="contrat-end" name="end" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Créer le contrat</button>
+                        <a href="contrats.html" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

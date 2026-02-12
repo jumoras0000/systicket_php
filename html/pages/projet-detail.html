@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site web e-commerce - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="projets">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- Navigation -->
+            <nav class="breadcrumb">
+                <a href="dashboard.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="projets.html">Projets</a>
+                <span class="breadcrumb-separator">/</span>
+                <span>—</span>
+            </nav>
+
+            <!-- En-tête projet -->
+            <header class="ticket-header">
+                <div class="ticket-header-left">
+                    <h1>—</h1>
+                    <div class="ticket-meta">
+                        <span class="badge badge-success">Actif</span>
+                        <span>Client : —</span>
+                    </div>
+                </div>
+                <div class="ticket-header-right">
+                    <a href="projet-form.html" class="btn btn-secondary btn-edit-project role-admin-collaborateur">✏️ Éditer</a>
+                    <a href="ticket-form.html" class="btn btn-primary btn-create-ticket role-admin-collaborateur">+ Créer un ticket</a>
+                </div>
+            </header>
+
+            <div class="ticket-layout">
+                <div class="ticket-main">
+                    <!-- Informations générales -->
+                    <section id="editer" class="ticket-section">
+                        <h2>Informations générales</h2>
+                        <div class="ticket-description">
+                            <p>—</p>
+                            <p><strong>Date de création :</strong> —</p>
+                            <p><strong>Date de fin prévue :</strong> —</p>
+                            <p><strong>Responsable projet :</strong> —</p>
+                        </div>
+                    </section>
+
+                    <!-- Contrat -->
+                    <section class="ticket-section">
+                        <h2>Contrat</h2>
+                        <div class="info-card">
+                            <dl class="info-list">
+                                <dt>Heures incluses</dt>
+                                <dd class="info-list-large">—</dd>
+                                
+                                <dt>Heures consommées</dt>
+                                <dd class="info-list-xlarge">—</dd>
+                                
+                                <dt>Heures restantes</dt>
+                                <dd class="info-list-success">—</dd>
+                                
+                                <dt>Taux horaire supplémentaire</dt>
+                                <dd>—</dd>
+                                
+                                <dt>Période de validité</dt>
+                                <dd>—</dd>
+                            </dl>
+                            <div class="project-progress project-progress-spacing">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <span class="progress-text">—</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Collaborateurs -->
+                    <section class="ticket-section">
+                        <h2>Collaborateurs assignés</h2>
+                        <div class="assignees-list">
+                            <p class="text-secondary text-sm">Aucun collaborateur assigné.</p>
+                        </div>
+                        <a href="utilisateurs.html" class="btn btn-text btn-small btn-manage-users role-admin-only">+ Ajouter un collaborateur</a>
+                    </section>
+
+                    <!-- Tickets du projet -->
+                    <section class="ticket-section">
+                        <div class="section-header">
+                            <h2>Tickets du projet</h2>
+                            <a href="ticket-form.html" class="btn btn-primary btn-small btn-create-ticket role-admin-collaborateur">+ Créer un ticket</a>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Titre</th>
+                                        <th>Statut</th>
+                                        <th>Priorité</th>
+                                        <th>Type</th>
+                                        <th>Assigné</th>
+                                        <th>Temps</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="8" class="table-empty">Aucun ticket pour ce projet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

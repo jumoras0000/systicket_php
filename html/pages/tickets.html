@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickets - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="tickets">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+        
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>Tickets</h1>
+                    <p class="page-subtitle">Gérez tous vos tickets</p>
+                </div>
+                <div class="page-header-right">
+                    <a href="ticket-form.html" class="btn btn-primary btn-create-ticket role-admin-collaborateur">+ Créer un ticket</a>
+                </div>
+            </div>
+
+            <!-- Barre d'outils -->
+            <section class="list-toolbar" aria-label="Barre d'outils liste">
+                <div class="list-toolbar-left">
+                    <span class="list-results-count"><strong>0</strong> ticket(s) affiché(s)</span>
+                </div>
+                <div class="list-toolbar-right">
+                    <button type="button" class="btn btn-text btn-small" onclick="window.print();" aria-label="Exporter / imprimer">📥 Exporter</button>
+                </div>
+            </section>
+
+            <!-- Filtres -->
+            <section class="filters-section">
+                <div class="filters-bar">
+                    <input type="search" placeholder="Rechercher un ticket..." class="search-input" aria-label="Recherche">
+                    <select class="filter-select" aria-label="Filtrer par statut">
+                        <option>Tous les statuts</option>
+                        <option>Nouveau</option>
+                        <option>En cours</option>
+                        <option>En attente client</option>
+                        <option>Terminé</option>
+                        <option>À valider</option>
+                        <option>Validé</option>
+                        <option>Refusé</option>
+                    </select>
+                    <select class="filter-select" aria-label="Filtrer par priorité">
+                        <option>Toutes les priorités</option>
+                        <option>Faible</option>
+                        <option>Normale</option>
+                        <option>Élevée</option>
+                        <option>Critique</option>
+                    </select>
+                    <select id="filter-type" class="filter-select" data-filter="type" aria-label="Filtrer par type">
+                        <option value="">Tous les types</option>
+                        <option value="included">Inclus</option>
+                        <option value="billable">Facturable</option>
+                    </select>
+                    <select class="filter-select" aria-label="Filtrer par projet">
+                        <option>Tous les projets</option>
+                        <option>Site e-commerce</option>
+                        <option>Application mobile</option>
+                        <option>Refonte site vitrine</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Tableau tickets -->
+            <section class="content-section">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Titre</th>
+                                <th>Projet</th>
+                                <th>Client</th>
+                                <th>Statut</th>
+                                <th>Priorité</th>
+                                <th>Type</th>
+                                <th>Assigné</th>
+                                <th>Temps</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-empty table-empty-row">
+                                <td colspan="11">Aucun ticket pour le moment.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+         
+                <div class="pagination">
+                    <button type="button" class="btn btn-text pagination-prev" disabled>Précédent</button>
+                    <span class="pagination-info">Page 1 sur 1</span>
+                    <button type="button" class="btn btn-text pagination-next" disabled>Suivant</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

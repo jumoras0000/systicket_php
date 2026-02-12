@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un ticket - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="tickets">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- Navigation -->
+            <nav class="breadcrumb">
+                <a href="dashboard.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="tickets.html">Tickets</a>
+                <span class="breadcrumb-separator">/</span>
+                <span>Créer un ticket</span>
+            </nav>
+
+            <!-- En-tête -->
+            <div class="page-header">
+                <h1>Créer un nouveau ticket</h1>
+            </div>
+
+            <!-- Formulaire -->
+            <section class="form-section">
+                <form class="ticket-form" id="ticket-form" action="tickets.html" method="get">
+                    <div id="ticket-form-messages" class="form-messages" role="alert" aria-live="polite"></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticket-title" class="form-label">
+                                Titre du ticket <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="ticket-title" 
+                                name="title" 
+                                class="form-input" 
+                                placeholder="Titre du ticket" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticket-description" class="form-label">
+                                Description <span class="required">*</span>
+                            </label>
+                            <textarea 
+                                id="ticket-description" 
+                                name="description" 
+                                class="form-textarea" 
+                                rows="6" 
+                                placeholder="Décrivez en détail le problème ou la demande..."
+                                required
+                                minlength="10"
+                            ></textarea>
+                            <small class="form-help">Minimum 10 caractères</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="ticket-project" class="form-label">
+                                Projet <span class="required">*</span>
+                            </label>
+                            <select id="ticket-project" name="project" class="form-select" required>
+                                <option value="">Sélectionner un projet</option>
+                                <option value="1">Site e-commerce</option>
+                                <option value="2">Application mobile</option>
+                                <option value="3">Refonte site vitrine</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ticket-priority" class="form-label">
+                                Priorité
+                            </label>
+                            <select id="ticket-priority" name="priority" class="form-select">
+                                <option value="normal">Normale</option>
+                                <option value="low">Faible</option>
+                                <option value="high">Élevée</option>
+                                <option value="critical">Critique</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Type de ticket <span class="required">*</span>
+                            </label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input 
+                                        type="radio" 
+                                        name="type" 
+                                        value="included" 
+                                        checked
+                                        required
+                                    >
+                                    <span>Inclus dans le contrat</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input 
+                                        type="radio" 
+                                        name="type" 
+                                        value="billable" 
+                                        required
+                                    >
+                                    <span>Facturable en supplément</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="ticket-estimated-hours" class="form-label">
+                                Temps estimé (heures)
+                            </label>
+                            <input 
+                                type="number" 
+                                id="ticket-estimated-hours" 
+                                name="estimated_hours" 
+                                class="form-input" 
+                                min="0" 
+                                step="0.5" 
+                                placeholder=""
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ticket-assignees" class="form-label">
+                                Assigner à
+                            </label>
+                            <select id="ticket-assignees" name="assignees[]" class="form-select" multiple>
+                                <option value="">Sélectionner un collaborateur</option>
+                                <option value="1">Jean Dupont</option>
+                                <option value="2">Marie Martin</option>
+                                <option value="3">Pierre Durand</option>
+                            </select>
+                            <small class="form-help">Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs</small>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Créer le ticket
+                        </button>
+                        <a href="tickets.html" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                        <button type="submit" name="draft" value="1" class="btn btn-text">
+                            Enregistrer comme brouillon
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation des tickets - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-client" data-role="client" data-page="validation">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar-client"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- En-tête -->
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>Tickets en attente de validation</h1>
+                    <p class="page-subtitle">Validez ou refusez les tickets facturables (vue client)</p>
+                </div>
+            </div>
+
+            <!-- Résumé -->
+            <section class="list-summary-cards" aria-label="Résumé à valider">
+                <article class="list-summary-card list-summary-card-warning">
+                    <span class="list-summary-value">—</span>
+                    <span class="list-summary-label">Tickets à valider</span>
+                </article>
+                <article class="list-summary-card list-summary-card-primary">
+                    <span class="list-summary-value">—</span>
+                    <span class="list-summary-label">Montant total</span>
+                </article>
+            </section>
+
+            <!-- Tickets à valider -->
+            <section class="content-section">
+                <div class="projects-grid">
+                    <article class="project-card">
+                        <header class="project-card-header">
+                            <h3>—</h3>
+                            <span class="badge badge-warning">À valider</span>
+                        </header>
+                        <div class="project-card-body">
+                            <p><strong>Projet :</strong> —</p>
+                            <p><strong>Description :</strong> —</p>
+                            <div class="card-body-spacing">
+                                <p><strong>Temps passé :</strong> —</p>
+                                <p><strong>Montant à facturer :</strong> <span class="text-amount">—</span></p>
+                            </div>
+                        </div>
+                        <footer class="project-card-footer card-footer-flex">
+                            <button class="btn btn-success flex-1">✅ Valider</button>
+                            <button class="btn btn-danger flex-1">❌ Refuser</button>
+                            <a href="ticket-detail.html" class="btn btn-text">Voir détails</a>
+                        </footer>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Section historique des validations passées -->
+            <section class="content-section section-spacing-lg">
+                <h2 class="card-title">Historique des validations</h2>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Projet</th>
+                                <th>Temps</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                            <tr>
+                                <td colspan="7" class="table-empty">Aucune validation enregistrée.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

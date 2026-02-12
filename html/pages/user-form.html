@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilisateur - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="utilisateurs">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <nav class="breadcrumb">
+                <a href="dashboard.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="utilisateurs.html">Utilisateurs</a>
+                <span class="breadcrumb-separator">/</span>
+                <span id="breadcrumb-action">—</span>
+            </nav>
+
+            <div class="page-header">
+                <h1 id="user-form-title">—</h1>
+                <p class="page-subtitle" id="user-form-subtitle">Gestion des utilisateurs (administrateur uniquement)</p>
+            </div>
+
+            <section class="form-section card">
+                <form id="user-form" class="ticket-form">
+                    <div class="form-messages" role="alert" aria-live="polite"></div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="user-nom" class="form-label">Nom <span class="required">*</span></label>
+                            <input type="text" id="user-nom" name="nom" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-prenom" class="form-label">Prénom <span class="required">*</span></label>
+                            <input type="text" id="user-prenom" name="prenom" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-email" class="form-label">Email <span class="required">*</span></label>
+                            <input type="email" id="user-email" name="email" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="user-role" class="form-label">Rôle <span class="required">*</span></label>
+                            <select id="user-role" name="role" class="form-select" required>
+                                <option value="">Sélectionner un rôle</option>
+                                <option value="admin">Administrateur</option>
+                                <option value="collaborateur">Collaborateur</option>
+                                <option value="client">Client</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-status" class="form-label">Statut</label>
+                            <select id="user-status" name="status" class="form-select">
+                                <option value="active">Actif</option>
+                                <option value="inactive">Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-telephone" class="form-label">Téléphone</label>
+                            <input type="tel" id="user-telephone" name="telephone" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a href="utilisateurs.html" class="btn btn-secondary">Annuler</a>
+                        <button type="button" id="user-delete-btn" class="btn btn-danger btn-outline" style="display:none;">Supprimer</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>

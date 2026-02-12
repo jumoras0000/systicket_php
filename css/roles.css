@@ -1,0 +1,137 @@
+
+.role-admin-only {
+    display: block;
+}
+
+.role-collaborateur .role-admin-only,
+.role-client .role-admin-only {
+    display: none !important;
+}
+
+/* Éléments accessibles aux admin et collaborateurs (pas aux clients) */
+.role-admin-collaborateur {
+    display: block;
+}
+
+.role-client .role-admin-collaborateur {
+    display: none !important;
+}
+
+/* Éléments accessibles uniquement aux clients */
+.role-client-only {
+    display: none;
+}
+
+.role-client .role-client-only {
+    display: block;
+}
+
+.role-admin .role-client-only,
+.role-collaborateur .role-client-only {
+    display: none !important;
+}
+
+/* Éléments accessibles aux admin et clients (pas aux collaborateurs) */
+.role-admin-client {
+    display: block;
+}
+
+.role-collaborateur .role-admin-client {
+    display: none !important;
+}
+
+/* Menu sidebar : éléments masqués selon le rôle */
+.role-client .nav-item-clients,
+.role-client .nav-item-contrats,
+.role-client .nav-item-tickets,
+.role-client .nav-item-temps,
+.role-client .nav-item-rapports,
+.role-client .nav-item-utilisateurs {
+    display: none !important;
+}
+
+.role-collaborateur .nav-item-clients,
+.role-collaborateur .nav-item-contrats,
+.role-collaborateur .nav-item-utilisateurs {
+    display: none !important;
+}
+
+/* Boutons d'action masqués selon le rôle */
+.role-client .btn-create-ticket,
+.role-client .btn-edit-ticket,
+.role-client .btn-create-project,
+.role-client .btn-edit-project,
+.role-client .btn-create-client,
+.role-client .btn-edit-client,
+.role-client .btn-create-contract,
+.role-client .btn-edit-contract,
+.role-client .btn-manage-users {
+    display: none !important;
+}
+
+.role-collaborateur .btn-create-client,
+.role-collaborateur .btn-edit-client,
+.role-collaborateur .btn-create-contract,
+.role-collaborateur .btn-edit-contract,
+.role-collaborateur .btn-manage-users {
+    display: none !important;
+}
+
+/* Sections masquées selon le rôle */
+.role-client .section-contrats,
+.role-client .section-utilisateurs,
+.role-client .section-rapports {
+    display: none !important;
+}
+
+.role-collaborateur .section-clients,
+.role-collaborateur .section-contrats,
+.role-collaborateur .section-utilisateurs {
+    display: none !important;
+}
+
+/* Tableaux : colonnes masquées selon le rôle */
+.role-client .table-col-client,
+.role-client .table-col-assignees {
+    display: none !important;
+}
+
+/* Messages d'information pour les restrictions */
+.role-restriction-notice {
+    display: none;
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--color-warning);
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+}
+
+.role-restriction-notice.show {
+    display: block;
+}
+
+/* Badge de rôle dans le header */
+.user-role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: var(--border-radius-sm);
+    margin-left: var(--spacing-sm);
+}
+
+.user-role-badge.admin {
+    background: var(--color-primary);
+    color: white;
+}
+
+.user-role-badge.collaborateur {
+    background: var(--color-info);
+    color: white;
+}
+
+.user-role-badge.client {
+    background: var(--color-secondary);
+    color: white;
+}

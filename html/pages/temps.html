@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi du temps - Systicket</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/roles.css">
+    <script src="../../js/components-loader.js" defer></script>
+</head>
+<body class="role-admin" data-role="admin" data-page="temps">
+    <div data-component="skip-link"></div>
+    <div data-component="header"></div>
+    <div data-component="overlay"></div>
+    <div class="container">
+        <div data-component="sidebar"></div>
+
+        <main id="main-content" class="main-content">
+            <!-- En-tête -->
+            <div class="page-header page-header-flex">
+                <div class="page-header-left">
+                    <h1>Suivi du temps</h1>
+                    <p class="page-subtitle">Enregistrez et consultez le temps passé (vue Jour / Semaine)</p>
+                </div>
+                <div class="page-header-right">
+                    <div class="time-period-nav" role="group" aria-label="Période">
+                        <a href="temps.html?week=-1" class="btn btn-text btn-small" id="week-prev">← Semaine préc.</a>
+                        <span class="time-period-label"><strong>Semaine du 27 jan — 2 fév 2026</strong></span>
+                        <a href="temps.html?week=1" class="btn btn-text btn-small" id="week-next">Semaine suiv. →</a>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-small" onclick="window.print();" aria-label="Exporter / imprimer">📥 Exporter</button>
+                </div>
+            </div>
+
+            <!-- Résumé -->
+            <section class="list-summary-cards" aria-label="Résumé des heures">
+                <article class="list-summary-card list-summary-card-primary">
+                    <span class="list-summary-value">—</span>
+                    <span class="list-summary-label">Ce mois</span>
+                </article>
+                <article class="list-summary-card list-summary-card-success">
+                    <span class="list-summary-value">—</span>
+                    <span class="list-summary-label">Cette semaine</span>
+                </article>
+                <article class="list-summary-card list-summary-card-muted">
+                    <span class="list-summary-value">—</span>
+                    <span class="list-summary-label">Restantes (enveloppe)</span>
+                </article>
+            </section>
+
+            <!-- Formulaire saisie temps -->
+            <section id="saisie" class="form-section">
+                <div class="card">
+                    <h2 class="card-title">Ajouter une entrée de temps</h2>
+                    <form id="time-form" class="ticket-form">
+                        <div class="form-messages" role="alert" aria-live="polite"></div>
+                        <div class="form-row form-row-2">
+                            <div class="form-group">
+                                <label for="time-ticket" class="form-label">
+                                    Ticket <span class="required">*</span>
+                                </label>
+                                <select id="time-ticket" name="ticket" class="form-select" required>
+                                    <option value="">Sélectionner un ticket</option>
+                                    <option value="1001">#1001 - Correction bug formulaire</option>
+                                    <option value="1002">#1002 - Nouvelle fonctionnalité</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="time-date" class="form-label">
+                                    Date <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="date" 
+                                    id="time-date" 
+                                    name="date" 
+                                    class="form-input" 
+                                    required
+                                    value="2026-01-28"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Heures et minutes (deux colonnes) -->
+                        <div class="form-row form-row-2">
+                            <div class="form-group">
+                                <label for="time-hours" class="form-label">
+                                    Heures <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="time-hours" 
+                                    name="hours" 
+                                    class="form-input" 
+                                    min="0" 
+                                    max="24" 
+                                    step="0.5" 
+                                    placeholder=""
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="time-minutes" class="form-label">
+                                    Minutes
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="time-minutes" 
+                                    name="minutes" 
+                                    class="form-input" 
+                                    min="0" 
+                                    max="59" 
+                                    step="15" 
+                                    placeholder="30"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Description du travail effectué -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="time-description" class="form-label">
+                                    Description du travail
+                                </label>
+                                <textarea 
+                                    id="time-description" 
+                                    name="description" 
+                                    class="form-textarea" 
+                                    rows="3" 
+                                    placeholder="Description"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Actions du formulaire -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            <button type="reset" class="btn btn-secondary">Réinitialiser</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section historique des entrées de temps -->
+            <section class="content-section section-spacing">
+                <div class="page-header">
+                    <h2>Historique des entrées</h2>
+                </div>
+
+                <!-- Filtres pour l'historique -->
+                <section class="filters-section">
+                    <div class="filters-bar">
+                        <input type="search" placeholder="Rechercher..." class="search-input">
+                        <select class="filter-select" data-filter="project">
+                            <option value="">Tous les projets</option>
+                            <option value="1">Site e-commerce</option>
+                            <option value="2">Application mobile</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Tableau de l'historique avec total en pied de page -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Ticket</th>
+                                <th>Projet</th>
+                                <th>Durée</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-empty-row">
+                                <td colspan="6">Aucune entrée de temps pour le moment.</td>
+                            </tr>
+                        </tbody>
+                        <!-- Pied de tableau avec total mensuel -->
+                        <tfoot>
+                            <tr class="table-footer">
+                                <td colspan="3"><strong>Total ce mois</strong></td>
+                                <td><strong class="text-hours-total">—</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div data-component="scripts"></div>
+</body>
+</html>
