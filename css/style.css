@@ -250,12 +250,6 @@ img {
     padding: 10px var(--spacing-md);
     color: var(--text-secondary);
     border-radius: var(--border-radius-sm);
-    transition: background 0.2s ease, color 0.2s ease;
-}
-
-.nav-link:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
 }
 
 .nav-item.active .nav-link {
@@ -2152,6 +2146,14 @@ img {
     padding-top: var(--spacing-xl);
     border-top: 1px solid var(--border-color);
     text-align: center;
+}
+
+.auth-form-footer-before-submit {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-top: none;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .auth-form-footer p {

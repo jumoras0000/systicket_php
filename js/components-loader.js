@@ -79,8 +79,7 @@
         async init() {
             const body = document.body;
             const currentPage = body.getAttribute('data-page');
-            const userRole = body.getAttribute('data-role') || 'admin';
-            
+
             const skipLinkTarget = document.querySelector('[data-component="skip-link"]');
             if (skipLinkTarget) {
                 await this.loadComponent('skip-link', '[data-component="skip-link"]');
@@ -98,17 +97,22 @@
             
             const sidebarTarget = document.querySelector('[data-component="sidebar"]');
             const sidebarClientTarget = document.querySelector('[data-component="sidebar-client"]');
-            
-            if (sidebarClientTarget) {
-                await this.loadComponent('sidebar-client', '[data-component="sidebar-client"]');
-                if (currentPage) {
-                    this.initSidebar(currentPage);
-                }
+            /* Rôle : URL > localStorage > data-role du body > défaut client */
+            const urlParams = new URLSearchParams(window.location.search);
+            const storedRole = (typeof localStorage !== 'undefined') ? localStorage.getItem('systicket_role') : null;
+            const bodyRole = body.getAttribute('data-role');
+            const userRole = urlParams.get('role') || storedRole || bodyRole || 'client';
+            const isClient = (userRole === 'client');
+            const clientPages = ['dashboard', 'projets', 'tickets', 'contrats', 'profil', 'validation'];
+            const useClientSidebar = isClient && clientPages.indexOf(currentPage) !== -1;
+
+            if (sidebarClientTarget || (sidebarTarget && useClientSidebar)) {
+                const targetSelector = sidebarClientTarget ? '[data-component="sidebar-client"]' : '[data-component="sidebar"]';
+                await this.loadComponent('sidebar-client', targetSelector);
+                if (currentPage) this.initSidebar(currentPage);
             } else if (sidebarTarget) {
                 await this.loadComponent('sidebar', '[data-component="sidebar"]');
-                if (currentPage) {
-                    this.initSidebar(currentPage);
-                }
+                if (currentPage) this.initSidebar(currentPage);
             }
             
             const scriptsTarget = document.querySelector('[data-component="scripts"]');

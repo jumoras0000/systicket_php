@@ -37,6 +37,16 @@
             var clients = AppData.get('clients') || [];
             var temps = AppData.get('temps') || [];
             var validations = AppData.get('validations') || [];
+            var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+            if (role === 'collaborateur') {
+                var allowedProjectIds = getProjectIdsForCollaborateur() || [];
+                tickets = tickets.filter(function(t) { return allowedProjectIds.indexOf(String(t.project)) !== -1; });
+            }
+            if (role === 'client') {
+                var allowedClientIds = getClientIdsForCurrentUser() || [];
+                var clientProjectIds = projets.filter(function(p) { return allowedClientIds.indexOf(String(p.client)) !== -1; }).map(function(p) { return String(p._id); });
+                tickets = tickets.filter(function(t) { return clientProjectIds.indexOf(String(t.project)) !== -1; });
+            }
             
             // Mettre à jour le compteur de tickets
             var resultsCount = document.querySelector('.list-results-count strong');
@@ -186,9 +196,16 @@
             var tickets = AppData.get('tickets') || [];
             var temps = AppData.get('temps') || [];
             var contrats = AppData.get('contrats') || [];
-            
-            console.log('Projets à afficher:', projets.length);
-            
+            var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+            if (role === 'collaborateur') {
+                var allowedProjectIds = getProjectIdsForCollaborateur() || [];
+                projets = projets.filter(function(p) { return allowedProjectIds.indexOf(String(p._id)) !== -1; });
+            }
+            if (role === 'client') {
+                var allowedClientIds = getClientIdsForCurrentUser() || [];
+                projets = projets.filter(function(p) { return allowedClientIds.indexOf(String(p.client)) !== -1; });
+            }
+
             projets.forEach(function(p, idx) {
                 var tr = document.createElement('tr');
                 tr.className = 'project-row';
@@ -258,10 +275,19 @@
             var projets = AppData.get('projets') || [];
             var clients = AppData.get('clients') || [];
             var temps = AppData.get('temps') || [];
-            
-            contrats.forEach(function(c) {
+            var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+            if (role === 'client') {
+                var allowedClientIds = getClientIdsForCurrentUser() || [];
+                contrats = contrats.filter(function(c) {
+                    if (allowedClientIds.indexOf(String(c.client)) !== -1) return true;
+                    var p = projets.find(function(pr) { return String(pr._id) === String(c.project); });
+                    return p && allowedClientIds.indexOf(String(p.client)) !== -1;
+                });
+            }
+            contrats.forEach(function(c, idx) {
                 var tr = document.createElement('tr');
                 tr.className = 'contrat-row';
+                tr.setAttribute('data-row-index', String(idx));
                 tr.setAttribute('data-systicket-injected', '1');
                 
                 // Trouver le nom du projet
@@ -305,6 +331,11 @@
             var temps = AppData.get('temps') || [];
             var projets = AppData.get('projets') || [];
             var tickets = AppData.get('tickets') || [];
+            var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+            if (role === 'collaborateur') {
+                var allowedProjectIds = getProjectIdsForCollaborateur() || [];
+                temps = temps.filter(function(t) { return allowedProjectIds.indexOf(String(t.project)) !== -1; });
+            }
             temps.forEach(function(t) {
                 var tr = document.createElement('tr');
                 tr.className = 'time-row';
@@ -359,6 +390,15 @@
         if (!dashboardProjects) return;
         
         var projets = AppData.get('projets') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedIds = getProjectIdsForCollaborateur() || [];
+            projets = projets.filter(function(p) { return allowedIds.indexOf(String(p._id)) !== -1; });
+        }
+        if (role === 'client') {
+            var allowedClientIds = getClientIdsForCurrentUser() || [];
+            projets = projets.filter(function(p) { return allowedClientIds.indexOf(String(p.client)) !== -1; });
+        }
         var clients = AppData.get('clients') || [];
         var existingItems = dashboardProjects.querySelectorAll('[data-systicket-injected="1"]');
         existingItems.forEach(function(item) { item.remove(); });
@@ -387,9 +427,9 @@
                     });
                     if (client) clientName = client.name || '—';
                     else if (p.client === '1') clientName = 'Acme Corp';
-                    else if (p.client === '2') clientName = 'Tech Solutions';
-                    else if (p.client === '3') clientName = 'Design Studio';
-                }
+                        else if (p.client === '2') clientName = 'Tech Solutions';
+                        else if (p.client === '3') clientName = 'Design Studio';
+                    }
                 var contrats = AppData.get('contrats') || [];
                 var temps = AppData.get('temps') || [];
                 var contract = contrats.find(function(c) { return String(c.project) === String(p._id); });
@@ -412,6 +452,15 @@
     function updateProjectStats() {
         var page = document.body.getAttribute('data-page');
         var projets = AppData.get('projets') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedIds = getProjectIdsForCollaborateur() || [];
+            projets = projets.filter(function(p) { return allowedIds.indexOf(String(p._id)) !== -1; });
+        }
+        if (role === 'client') {
+            var allowedClientIds = getClientIdsForCurrentUser() || [];
+            projets = projets.filter(function(p) { return allowedClientIds.indexOf(String(p.client)) !== -1; });
+        }
         
         // Compter les projets par statut
         var active = 0;
@@ -476,8 +525,18 @@
     function updateContractStats() {
         var contrats = AppData.get('contrats') || [];
         var temps = AppData.get('temps') || [];
+        var projets = AppData.get('projets') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'client') {
+            var allowedIds = getClientIdsForCurrentUser() || [];
+            contrats = contrats.filter(function(c) {
+                if (allowedIds.indexOf(String(c.client)) !== -1) return true;
+                var p = projets.find(function(pr) { return String(pr._id) === String(c.project); });
+                return p && allowedIds.indexOf(String(p.client)) !== -1;
+            });
+        }
         
-        // Calculer les heures totales, consommées et restantes (tous contrats confondus)
+        // Calculer les heures totales, consommées et restantes
         var totalHours = 0;
         var consumedHours = 0;
         
@@ -524,6 +583,13 @@
         var tickets = AppData.get('tickets') || [];
         var projets = AppData.get('projets') || [];
         var temps = AppData.get('temps') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedProjectIds = getProjectIdsForCollaborateur() || [];
+            tickets = tickets.filter(function(t) { return allowedProjectIds.indexOf(String(t.project)) !== -1; });
+            projets = projets.filter(function(p) { return allowedProjectIds.indexOf(String(p._id)) !== -1; });
+            temps = temps.filter(function(t) { return allowedProjectIds.indexOf(String(t.project)) !== -1; });
+        }
         var validations = AppData.get('validations') || [];
         var contrats = AppData.get('contrats') || [];
         
@@ -1192,6 +1258,14 @@
         var contrats = AppData.get('contrats') || [];
         var projets = AppData.get('projets') || [];
         var tickets = AppData.get('tickets') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedProjectIds = getProjectIdsForCollaborateur() || [];
+            temps = temps.filter(function(t) { return allowedProjectIds.indexOf(String(t.project)) !== -1; });
+            tickets = tickets.filter(function(tk) { return allowedProjectIds.indexOf(String(tk.project)) !== -1; });
+            projets = projets.filter(function(p) { return allowedProjectIds.indexOf(String(p._id)) !== -1; });
+            contrats = contrats.filter(function(c) { return allowedProjectIds.indexOf(String(c.project)) !== -1; });
+        }
 
         var now = new Date();
         var currentMonth = now.getMonth();
@@ -1328,6 +1402,11 @@
     /* Met à jour les menus déroulants de sélection de projets */
     function updateProjectSelects() {
         var projets = AppData.get('projets') || [];
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedIds = getProjectIdsForCollaborateur() || [];
+            projets = projets.filter(function(p) { return allowedIds.indexOf(String(p._id)) !== -1; });
+        }
         var projectSelects = document.querySelectorAll('#ticket-project, #contrat-project');
         projectSelects.forEach(function(select) {
             if (!select || !select.id) return;
@@ -1403,6 +1482,24 @@
         }
         
         if (!projet) return;
+
+        /* Collaborateur : vérifier qu'il est assigné au projet */
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedIds = getProjectIdsForCollaborateur() || [];
+            if (allowedIds.indexOf(String(projet._id)) === -1) {
+                window.location.href = 'projets.html?role=collaborateur';
+                return;
+            }
+        }
+        /* Client : vérifier que le projet appartient à son entreprise */
+        if (role === 'client') {
+            var allowedClientIds = getClientIdsForCurrentUser() || [];
+            if (allowedClientIds.indexOf(String(projet.client)) === -1) {
+                window.location.href = 'projets.html?role=client';
+                return;
+            }
+        }
         
         // Mettre à jour l'ID du projet pour les liens
         projectId = projet._id;
@@ -2081,7 +2178,7 @@
         var isDetailPage = document.querySelector('.ticket-header') !== null;
         if (!isDetailPage) return;
         
-        // Récupérer l'ID du contrat depuis l'URL
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
         var urlParams = new URLSearchParams(window.location.search);
         var contractId = urlParams.get('id');
         if (!contractId) {
@@ -2128,6 +2225,17 @@
         if (!contract) {
             console.log('Aucun contrat disponible');
             return;
+        }
+        
+        /* Client : vérifier que le contrat le concerne */
+        if (role === 'client') {
+            var allowedIds = getClientIdsForCurrentUser() || [];
+            var projet = projets.find(function(p) { return String(p._id) === String(contract.project); });
+            var contractClientId = String(contract.client || (projet ? projet.client : ''));
+            if (allowedIds.indexOf(contractClientId) === -1) {
+                window.location.href = 'contrats.html?role=client';
+                return;
+            }
         }
         
         // Mettre à jour l'ID du contrat pour les liens
@@ -2383,14 +2491,59 @@
         
         var ticket = tickets.find(function(t) { return String(t._id) === String(ticketId); });
         if (!ticket) return;
+
+        /* Collaborateur : vérifier que le ticket appartient à un projet qui lui est assigné OU qu'il est assigné directement au ticket */
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role === 'collaborateur') {
+            var allowedIds = getProjectIdsForCollaborateur() || [];
+            var hasProjectAccess = allowedIds.indexOf(String(ticket.project)) !== -1;
+            
+            var users = getUtilisateurs();
+            var profil = AppData.get('profil') || {};
+            var userEmail = (profil && profil.email) ? profil.email : (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_user_email') : null);
+            var currentUser = users.find(function(u) { return String(u.role) === 'collaborateur' && String(u.email) === String(userEmail); });
+            var userId = currentUser ? String(currentUser._id) : null;
+            
+            var ticketAssignees = ticket.assignees || ticket['assignees[]'] || [];
+            if (!Array.isArray(ticketAssignees)) ticketAssignees = ticketAssignees ? [ticketAssignees] : [];
+            var isAssignedToTicket = userId && ticketAssignees.some(function(a) { return String(a) === userId; });
+            
+            if (!hasProjectAccess && !isAssignedToTicket) {
+                window.location.href = 'tickets.html?role=collaborateur';
+                return;
+            }
+        }
+        /* Client : vérifier que le ticket appartient à un projet de son entreprise */
+        if (role === 'client') {
+            var allowedClientIds = getClientIdsForCurrentUser() || [];
+            var projet = projets.find(function(p) { return String(p._id) === String(ticket.project); });
+            if (!projet || allowedClientIds.indexOf(String(projet.client)) === -1) {
+                window.location.href = 'ticket-validation.html?role=client';
+                return;
+            }
+        }
         
-        /* Liens Éditer, Ajouter du temps, Dupliquer */
+        /* Liens Éditer, Ajouter du temps, Dupliquer (cachés pour client via role-admin-collaborateur) */
         var editLink = document.querySelector('.btn-edit-ticket');
         if (editLink) editLink.setAttribute('href', 'ticket-form.html?id=' + encodeURIComponent(ticketId));
         var addTimeLink = document.querySelector('.ticket-header-right a[href*="temps.html"]');
         if (addTimeLink) addTimeLink.setAttribute('href', 'temps.html?ticket=' + encodeURIComponent(ticketId));
         var duplicateLink = document.querySelector('a[href*="duplicate="]');
         if (duplicateLink) duplicateLink.setAttribute('href', 'ticket-form.html?duplicate=' + encodeURIComponent(ticketId));
+        
+        /* Client : désactiver les actions rapides (changer statut) */
+        if (role === 'client') {
+            var statusSelect = document.querySelector('.action-list select.form-select');
+            if (statusSelect) {
+                statusSelect.disabled = true;
+                statusSelect.style.opacity = '0.5';
+                statusSelect.style.cursor = 'not-allowed';
+            }
+            var actionCard = document.querySelector('.info-card.role-admin-collaborateur');
+            if (actionCard && actionCard.querySelector('h3') && actionCard.querySelector('h3').textContent === 'Actions rapides') {
+                actionCard.style.display = 'none';
+            }
+        }
         
         /* Titre et breadcrumb */
         var title = document.querySelector('.ticket-header-left h1');
@@ -2549,6 +2702,9 @@
                 firstItem.querySelector('.timeline-time').textContent = ticket._id ? new Date(parseInt(ticket._id)).toLocaleDateString('fr-FR') : '—';
             }
         }
+        
+        /* Commentaires */
+        loadTicketComments(ticketId);
     }
 
     /* Met à jour la page ticket-validation (cartes à valider + historique) */
@@ -2703,12 +2859,22 @@
             var projets = AppData.get('projets') || [];
             var projet = projets.find(function(p) { return String(p._id) === String(id); });
             if (projet) {
+                var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+                if (role === 'collaborateur') {
+                    var allowedIds = getProjectIdsForCollaborateur() || [];
+                    if (allowedIds.indexOf(String(projet._id)) === -1) {
+                        window.location.href = 'projets.html?role=collaborateur';
+                        return;
+                    }
+                }
                 var nameEl = document.getElementById('project-name');
                 var descEl = document.getElementById('project-description');
                 var clientEl = document.getElementById('project-client');
                 var statusEl = document.getElementById('project-status');
                 var startEl = document.getElementById('project-start');
                 var endEl = document.getElementById('project-end');
+                var managerEl = document.getElementById('project-manager');
+                var assigneesEl = document.getElementById('project-assignees');
                 var title = projectForm.closest('main') && projectForm.closest('main').querySelector('h1');
                 if (nameEl) nameEl.value = projet.name || '';
                 if (descEl) descEl.value = projet.description || '';
@@ -2716,6 +2882,14 @@
                 if (statusEl) statusEl.value = projet.status || 'active';
                 if (startEl) startEl.value = projet.start_date || '';
                 if (endEl) endEl.value = projet.end_date || '';
+                if (managerEl) managerEl.value = projet.manager || '';
+                if (assigneesEl) {
+                    var assignees = projet.assignees || projet['assignees[]'] || [];
+                    if (!Array.isArray(assignees)) assignees = assignees ? [assignees] : [];
+                    Array.from(assigneesEl.options).forEach(function(opt) {
+                        opt.selected = assignees.indexOf(String(opt.value)) !== -1;
+                    });
+                }
                 if (title) title.textContent = 'Modifier le projet';
             }
             return;
@@ -2749,6 +2923,14 @@
             var tickets = AppData.get('tickets') || [];
             var ticket = tickets.find(function(t) { return String(t._id) === String(id); });
             if (ticket) {
+                var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+                if (role === 'collaborateur') {
+                    var allowedIds = getProjectIdsForCollaborateur() || [];
+                    if (allowedIds.indexOf(String(ticket.project)) === -1) {
+                        window.location.href = 'tickets.html?role=collaborateur';
+                        return;
+                    }
+                }
                 var titleEl = document.querySelector('#ticket-form [name="title"]');
                 var projectEl = document.querySelector('#ticket-form [name="project"]');
                 var statusEl = document.querySelector('#ticket-form [name="status"]');
@@ -2785,6 +2967,8 @@
                 if (roleEl) roleEl.value = user.role || 'collaborateur';
                 if (statusEl) statusEl.value = user.status || 'active';
                 if (telEl) telEl.value = user.telephone || '';
+                var clientIdEl = document.getElementById('user-client');
+                if (clientIdEl) clientIdEl.value = user.client_id || '';
                 if (titleEl) titleEl.textContent = 'Modifier l\'utilisateur';
                 if (breadcrumbEl) breadcrumbEl.textContent = 'Modifier';
                 var deleteBtn = document.getElementById('user-delete-btn');
@@ -2829,6 +3013,41 @@
         }
     }
 
+    /* Retourne les IDs projets que l'utilisateur connecté (rôle collaborateur) peut voir */
+    function getProjectIdsForCollaborateur() {
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'admin';
+        if (role !== 'collaborateur') return null;
+        var profil = AppData.get('profil');
+        var userEmail = (profil && profil.email) ? profil.email : (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_user_email') : null);
+        if (!userEmail) return [];
+        var users = getUtilisateurs();
+        var user = users.find(function(u) { return String(u.role) === 'collaborateur' && String(u.email) === String(userEmail); });
+        if (!user) return [];
+        var userId = String(user._id);
+        var projets = AppData.get('projets') || [];
+        return projets.filter(function(p) {
+            if (String(p.manager) === userId) return true;
+            var assignees = p.assignees || p['assignees[]'] || [];
+            if (!Array.isArray(assignees)) assignees = assignees ? [assignees] : [];
+            return assignees.some(function(a) { return String(a) === userId; });
+        }).map(function(p) { return String(p._id); });
+    }
+
+    /* Retourne les IDs clients (entreprises) que l'utilisateur connecté (rôle client) peut voir */
+    function getClientIdsForCurrentUser() {
+        var role = (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_role') : null) || 'client';
+        if (role !== 'client') return null;
+        var profil = AppData.get('profil');
+        var userEmail = (profil && profil.email) ? profil.email : (typeof localStorage !== 'undefined' ? localStorage.getItem('systicket_user_email') : null);
+        if (!userEmail) return [];
+        var users = getUtilisateurs();
+        var user = users.find(function(u) { return String(u.role) === 'client' && String(u.email) === String(userEmail); });
+        if (user && user.client_id) return [String(user.client_id)];
+        var clients = AppData.get('clients') || [];
+        var matching = clients.filter(function(c) { return String(c.email) === String(userEmail); });
+        return matching.map(function(c) { return String(c._id); });
+    }
+
     /* Utilisateurs par défaut (fallback si non enregistrés) */
     function getUtilisateurs() {
         var u = AppData.get('utilisateurs');
@@ -2836,11 +3055,11 @@
         return [
             { _id: 1, nom: 'Dupont', prenom: 'Jean', email: 'jean@exemple.fr', telephone: '01 23 45 67 89', role: 'admin', status: 'active', last_login: '2026-02-08' },
             { _id: 2, nom: 'Martin', prenom: 'Marie', email: 'marie@exemple.fr', telephone: '', role: 'collaborateur', status: 'active', last_login: '2026-02-07' },
-            { _id: 3, nom: 'Client', prenom: 'Pierre', email: 'pierre@client.fr', telephone: '', role: 'client', status: 'inactive', last_login: null }
+            { _id: 3, nom: 'Client', prenom: 'Pierre', email: 'pierre@client.fr', telephone: '', role: 'client', status: 'active', last_login: null, client_id: '1' }
         ];
     }
 
-    /* Met à jour la page formulaire utilisateur (titre, breadcrumb, restriction rôle admin) */
+    /* Met à jour la page formulaire utilisateur (titre, breadcrumb, restriction rôle admin, sélecteur client) */
     function updateUserFormPage() {
         var page = document.body.getAttribute('data-page');
         if (page !== 'utilisateurs') return;
@@ -2859,6 +3078,23 @@
         if (roleSelect && currentRole !== 'admin') {
             var adminOpt = roleSelect.querySelector('option[value="admin"]');
             if (adminOpt) adminOpt.remove();
+        }
+        var clientRow = document.getElementById('user-client-row');
+        var clientSelect = document.getElementById('user-client');
+        if (clientRow && clientSelect) {
+            var clients = AppData.get('clients') || [];
+            while (clientSelect.options.length > 1) clientSelect.remove(1);
+            clients.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c._id;
+                opt.textContent = (c.name || '—');
+                clientSelect.appendChild(opt);
+            });
+            var toggleClientRow = function() {
+                clientRow.style.display = (roleSelect && roleSelect.value === 'client') ? 'block' : 'none';
+            };
+            toggleClientRow();
+            if (roleSelect) roleSelect.addEventListener('change', toggleClientRow);
         }
     }
 
@@ -2955,6 +3191,110 @@
         if (passwordCard) passwordCard.style.display = 'none';
     }
 
+    /* Charge et affiche les commentaires pour un ticket */
+    function loadTicketComments(ticketId) {
+        if (!ticketId) return;
+        var commentsList = document.querySelector('.comments-list');
+        if (!commentsList) return;
+        
+        var commentaires = AppData.get('commentaires') || [];
+        var ticketComments = commentaires.filter(function(c) { 
+            var cTicket = String(c.ticket || '');
+            return cTicket === String(ticketId);
+        });
+        
+        var existingP = commentsList.querySelector('p.text-secondary');
+        var existingComments = commentsList.querySelectorAll('.comment');
+        existingComments.forEach(function(c) { c.remove(); });
+        if (existingP) existingP.remove();
+        
+        if (ticketComments.length > 0) {
+            ticketComments.sort(function(a, b) {
+                var dateA = a.date ? new Date(a.date).getTime() : 0;
+                var dateB = b.date ? new Date(b.date).getTime() : 0;
+                return dateA - dateB;
+            });
+            ticketComments.forEach(function(comment) {
+                var profil = AppData.get('profil') || {};
+                var users = getUtilisateurs();
+                var commentUser = users.find(function(u) { return String(u._id) === String(comment.user); });
+                var authorName = commentUser ? ((commentUser.prenom || '') + ' ' + (commentUser.nom || '')).trim() : (comment.author || 'Utilisateur');
+                var commentDate = comment.date ? new Date(comment.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+                
+                var commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.innerHTML = '<div class="comment-header"><span class="comment-author">' + authorName + '</span><time class="comment-date">' + commentDate + '</time></div><p>' + (comment.text || '—') + '</p>';
+                commentsList.appendChild(commentDiv);
+            });
+        } else {
+            var emptyMsg = document.createElement('p');
+            emptyMsg.className = 'text-secondary text-sm';
+            emptyMsg.textContent = 'Aucun commentaire.';
+            commentsList.appendChild(emptyMsg);
+        }
+    }
+
+    /* Initialise le formulaire de commentaires */
+    function initCommentForm() {
+        var commentForm = document.querySelector('.comment-form');
+        if (!commentForm) return;
+        
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var textarea = commentForm.querySelector('textarea');
+            var commentText = textarea ? textarea.value.trim() : '';
+            if (!commentText) {
+                alert('Veuillez saisir un commentaire.');
+                return;
+            }
+            
+            var urlParams = new URLSearchParams(window.location.search);
+            var ticketId = urlParams.get('id');
+            if (!ticketId) {
+                var ticketIdEl = document.querySelector('.ticket-id');
+                if (ticketIdEl) {
+                    var idText = ticketIdEl.textContent || '';
+                    ticketId = idText.replace('#', '').trim();
+                }
+            }
+            if (!ticketId) {
+                alert('Impossible de déterminer le ticket.');
+                return;
+            }
+            
+            var profil = AppData.get('profil') || {};
+            var users = getUtilisateurs();
+            var currentUser = users.find(function(u) { return String(u.email) === String(profil.email); });
+            var userId = currentUser ? String(currentUser._id) : '1';
+            
+            var comment = {
+                ticket: String(ticketId),
+                user: userId,
+                text: commentText,
+                date: new Date().toISOString(),
+                author: currentUser ? ((currentUser.prenom || '') + ' ' + (currentUser.nom || '')).trim() : 'Utilisateur'
+            };
+            
+            if (window.Storage && window.Storage.add) {
+                window.Storage.add('commentaires', comment);
+                if (textarea) textarea.value = '';
+                loadTicketComments(ticketId);
+                
+                var toast = document.getElementById('systicket-toast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'systicket-toast';
+                    toast.className = 'validation-toast';
+                    document.body.appendChild(toast);
+                }
+                toast.textContent = 'Commentaire publié avec succès.';
+                toast.className = 'validation-toast validation-toast-success';
+                toast.style.display = 'block';
+                setTimeout(function() { toast.style.display = 'none'; }, 3000);
+            }
+        });
+    }
+
     function init() {
         injectStoredRows();
         updateDashboardProjects();
@@ -2964,7 +3304,6 @@
         updateClientDetail();
         updateProjectDetail();
         updateContractDetail();
-        updateTicketDetail();
         updateValidationPage();
         updateReports();
         updateClientSelects();
@@ -2975,6 +3314,16 @@
         updateUserFormPage();
         updatePendingProfiles();
         updateProfilDetail();
+        initCommentForm();
+        
+        setTimeout(function() {
+            updateTicketDetail();
+            var urlParams = new URLSearchParams(window.location.search);
+            var ticketId = urlParams.get('id');
+            if (ticketId) {
+                loadTicketComments(ticketId);
+            }
+        }, 300);
         var profileForm = document.getElementById('profile-form');
         if (profileForm) {
             var urlParams = new URLSearchParams(window.location.search);
@@ -3027,7 +3376,18 @@
     } else {
         init();
     }
-    window.addEventListener('systicket:contentLoaded', init);
+    window.addEventListener('systicket:contentLoaded', function() {
+        init();
+        initCommentForm();
+        setTimeout(function() {
+            updateTicketDetail();
+            var urlParams = new URLSearchParams(window.location.search);
+            var ticketId = urlParams.get('id');
+            if (ticketId) {
+                loadTicketComments(ticketId);
+            }
+        }, 200);
+    });
     window.addEventListener('systicket:projectAdded', function(e) {
         setTimeout(function() {
             var page = document.body.getAttribute('data-page');
@@ -3064,4 +3424,7 @@
     window.addEventListener('systicket:reportsUpdate', function() {
         updateReports();
     });
+    
+    /* Exposer updateValidationPage globalement pour ticket-validation.js */
+    window.updateValidationPage = updateValidationPage;
 })();

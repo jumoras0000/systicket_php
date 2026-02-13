@@ -145,6 +145,17 @@
                         <span class="auth-help">Seuls les collaborateurs et clients peuvent s'inscrire.</span>
                     </div>
 
+                    <!-- Entreprise (visible uniquement pour le rôle client) -->
+                    <div class="auth-form-group auth-form-group-client-entreprise" id="inscription-client-group" style="display:none;">
+                        <label for="client_id" class="auth-label">Votre entreprise <span class="auth-required">*</span></label>
+                        <div class="auth-input-wrap auth-input-wrap-no-icon">
+                            <select id="client_id" name="client_id" class="auth-input auth-select">
+                                <option value="">— Choisir une entreprise —</option>
+                            </select>
+                        </div>
+                        <span class="auth-help">Sélectionnez l'entreprise cliente à laquelle vous êtes rattaché.</span>
+                    </div>
+
                     <!-- Case à cocher pour accepter les CGU (requis) -->
                     <div class="auth-form-group">
                         <label class="auth-checkbox">
@@ -154,6 +165,11 @@
                         </label>
                     </div>
 
+                    <!-- Message de connexion avant le bouton -->
+                    <div class="auth-form-footer auth-form-footer-before-submit">
+                        <p>Vous avez déjà un compte ? <a href="connexion.html" class="auth-link auth-link-strong">Se connecter</a></p>
+                    </div>
+
                     <!-- Wrapper pour le bouton qui fuit le curseur si formulaire invalide (JS) -->
                     <div class="auth-btn-flee-wrapper">
                         <button type="submit" class="auth-btn auth-btn-primary" id="auth-submit-btn">
@@ -161,13 +177,10 @@
                         </button>
                     </div>
                 </form>
-
-                <footer class="auth-form-footer">
-                    <p>Vous avez déjà un compte ? <a href="connexion.html" class="auth-link auth-link-strong">Se connecter</a></p>
-                </footer>
             </div>
         </main>
     </div>
+    <script src="../../js/storage.js"></script>
     <script src="../../js/auth-button.js"></script>
     <script src="../../js/forms-validation.js"></script>
 </body>

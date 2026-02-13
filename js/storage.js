@@ -43,9 +43,9 @@
         ]);
 
         set('projets', [
-            { _id: 101, name: 'Site e-commerce', client: '1', status: 'active', start_date: '2025-01-15', end_date: '2025-06-30' },
-            { _id: 102, name: 'Application mobile', client: '2', status: 'paused', start_date: '2025-02-01', end_date: '2025-08-31' },
-            { _id: 103, name: 'Refonte site vitrine', client: '1', status: 'completed', start_date: '2024-10-01', end_date: '2025-01-15' }
+            { _id: 101, name: 'Site e-commerce', client: '1', status: 'active', start_date: '2025-01-15', end_date: '2025-06-30', manager: '1', assignees: ['1', '2'] },
+            { _id: 102, name: 'Application mobile', client: '2', status: 'paused', start_date: '2025-02-01', end_date: '2025-08-31', manager: '2', assignees: ['2'] },
+            { _id: 103, name: 'Refonte site vitrine', client: '1', status: 'completed', start_date: '2024-10-01', end_date: '2025-01-15', manager: '1', assignees: ['1'] }
         ]);
 
         set('tickets', [
@@ -65,10 +65,11 @@
         ]);
 
         set('validations', []);
+        set('commentaires', []);
         set('utilisateurs', [
             { _id: 1, nom: 'Dupont', prenom: 'Jean', email: 'jean@exemple.fr', telephone: '01 23 45 67 89', role: 'admin', status: 'active', last_login: '2026-02-08' },
             { _id: 2, nom: 'Martin', prenom: 'Marie', email: 'marie@exemple.fr', telephone: '', role: 'collaborateur', status: 'active', last_login: '2026-02-07' },
-            { _id: 3, nom: 'Client', prenom: 'Pierre', email: 'pierre@client.fr', telephone: '', role: 'client', status: 'inactive', last_login: null }
+            { _id: 3, nom: 'Client', prenom: 'Pierre', email: 'pierre@client.fr', telephone: '', role: 'client', status: 'active', last_login: null, client_id: '1' }
         ]);
         set('profil', null);
     }

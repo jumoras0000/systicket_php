@@ -19,7 +19,7 @@
         client: {
             name: 'Client',
             badge: 'client',
-            menuItems: ['dashboard', 'projets', 'validation', 'profil'],
+            menuItems: ['dashboard', 'projets', 'tickets', 'contrats', 'validation', 'profil'],
             allowedActions: ['validate-ticket', 'refuse-ticket']
         }
     };
@@ -27,7 +27,7 @@
     /* Applique le rôle à la page et cache les éléments non autorisés */
     function applyRole(role) {
         if (!role || !rolesConfig[role]) {
-            role = 'admin'; 
+            role = 'client';
         }
         
         const config = rolesConfig[role];
@@ -40,11 +40,17 @@
         
 
         const userName = document.querySelector('.user-name');
-        if (userName && !userName.querySelector('.user-role-badge')) {
-            const badge = document.createElement('span');
-            badge.className = 'user-role-badge ' + config.badge;
-            badge.textContent = config.name;
-            userName.appendChild(badge);
+        if (userName) {
+            let badge = userName.querySelector('.user-role-badge');
+            if (badge) {
+                badge.className = 'user-role-badge ' + config.badge;
+                badge.textContent = config.name;
+            } else {
+                badge = document.createElement('span');
+                badge.className = 'user-role-badge ' + config.badge;
+                badge.textContent = config.name;
+                userName.appendChild(badge);
+            }
         }
         
         // Masquer les éléments du menu selon le rôle
@@ -89,20 +95,58 @@
             if (!config.allowedActions.includes(action)) {
                 const elements = document.querySelectorAll(actionButtons[action]);
                 elements.forEach(function(el) {
-                    el.style.display = 'none';
+                    // Exception : boutons Assigner et Dupliquer sont grisés au lieu de masqués
+                    if (el.classList.contains('btn-manage-users') || el.getAttribute('href') && el.getAttribute('href').indexOf('duplicate') !== -1) {
+                        el.style.pointerEvents = 'none';
+                        el.style.cursor = 'not-allowed';
+                        el.style.opacity = '0.5';
+                        el.style.filter = 'grayscale(100%)';
+                        el.setAttribute('data-disabled', 'true');
+                        el.removeAttribute('href');
+                        el.onclick = function(e) { e.preventDefault(); return false; };
+                    } else {
+                        el.style.display = 'none';
+                    }
                 });
             }
         });
+        
+        // Désactiver spécifiquement les boutons Assigner et Dupliquer selon le rôle
+        if (role === 'client') {
+            const duplicateLinks = document.querySelectorAll('a[href*="duplicate"]');
+            duplicateLinks.forEach(function(link) {
+                link.style.pointerEvents = 'none';
+                link.style.cursor = 'not-allowed';
+                link.style.opacity = '0.5';
+                link.style.filter = 'grayscale(100%)';
+                link.setAttribute('data-disabled', 'true');
+                link.removeAttribute('href');
+                link.onclick = function(e) { e.preventDefault(); return false; };
+            });
+        }
+        
+        if (role === 'collaborateur' || role === 'client') {
+            const assignLinks = document.querySelectorAll('.btn-manage-users');
+            assignLinks.forEach(function(link) {
+                link.style.pointerEvents = 'none';
+                link.style.cursor = 'not-allowed';
+                link.style.opacity = '0.5';
+                link.style.filter = 'grayscale(100%)';
+                link.setAttribute('data-disabled', 'true');
+                link.removeAttribute('href');
+                link.onclick = function(e) { e.preventDefault(); return false; };
+            });
+        }
     }
     
     // Matrice des permissions : page (data-page) -> rôles autorisés (conformément au guide)
     const pageAccess = {
         dashboard: ['admin', 'collaborateur', 'client'],
         projets: ['admin', 'collaborateur', 'client'],
-        tickets: ['admin', 'collaborateur'],
+        tickets: ['admin', 'collaborateur', 'client'],
         temps: ['admin', 'collaborateur'],
         clients: ['admin'],
-        contrats: ['admin'],
+        contrats: ['admin', 'client'],
         rapports: ['admin'],
         utilisateurs: ['admin'],
         profil: ['admin', 'collaborateur', 'client'],
@@ -118,6 +162,12 @@
         if (page === 'profil') {
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('id')) allowed = ['admin'];
+        }
+        // Client : pas d'accès aux formulaires de création/édition projet, ticket et contrat
+        if (role === 'client') {
+            if (document.getElementById('project-form')) allowed = ['admin', 'collaborateur'];
+            if (document.getElementById('ticket-form')) allowed = ['admin', 'collaborateur'];
+            if (document.getElementById('contrat-form')) allowed = ['admin'];
         }
         if (allowed.indexOf(role) === -1) {
             var redirect = 'dashboard.html';
@@ -137,6 +187,10 @@
         checkPageAccess(role);
     }
 
-    document.addEventListener('DOMContentLoaded', initRole);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRole);
+    } else {
+        initRole();
+    }
     window.addEventListener('systicket:contentLoaded', initRole);
 })();

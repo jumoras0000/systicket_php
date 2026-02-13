@@ -8,6 +8,16 @@
     display: none !important;
 }
 
+/* Exception : bouton Assigner visible mais grisé pour collaborateur et client */
+.role-collaborateur .btn-manage-users.role-admin-only,
+.role-client .btn-manage-users.role-admin-only {
+    display: block !important;
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
 /* Éléments accessibles aux admin et collaborateurs (pas aux clients) */
 .role-admin-collaborateur {
     display: block;
@@ -15,6 +25,16 @@
 
 .role-client .role-admin-collaborateur {
     display: none !important;
+}
+
+/* Exception : bouton Dupliquer visible mais grisé pour client */
+.role-client a[href*="duplicate"].role-admin-collaborateur,
+.role-client .btn[href*="duplicate"].role-admin-collaborateur {
+    display: block !important;
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(100%);
 }
 
 /* Éléments accessibles uniquement aux clients */
@@ -64,18 +84,17 @@
 .role-client .btn-create-client,
 .role-client .btn-edit-client,
 .role-client .btn-create-contract,
-.role-client .btn-edit-contract,
-.role-client .btn-manage-users {
+.role-client .btn-edit-contract {
     display: none !important;
 }
 
 .role-collaborateur .btn-create-client,
 .role-collaborateur .btn-edit-client,
 .role-collaborateur .btn-create-contract,
-.role-collaborateur .btn-edit-contract,
-.role-collaborateur .btn-manage-users {
+.role-collaborateur .btn-edit-contract {
     display: none !important;
 }
+
 
 /* Sections masquées selon le rôle */
 .role-client .section-contrats,
