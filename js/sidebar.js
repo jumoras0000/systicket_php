@@ -89,7 +89,7 @@
         var href = link.getAttribute('href') || '';
         if (href.indexOf('#') === 0) return false;
         try {
-            var base = (window.SYSTICKET && window.SYSTICKET.baseUrl) || '/systicket2';
+            var base = (window.SYSTICKET && window.SYSTICKET.baseUrl) || '/systicket_php';
             var fullUrl = new URL(link.href, window.location.origin);
             var curUrl = new URL(window.location.href);
             if (fullUrl.origin !== curUrl.origin) return false;

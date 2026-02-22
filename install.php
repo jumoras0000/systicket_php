@@ -3,7 +3,7 @@
  * Systicket 2.0 - Script d'installation
  * Crée la base de données et les tables à partir de schema.sql
  * 
- * Usage: accéder à /systicket2/install.php dans le navigateur
+ * Usage: accéder à /systicket_php/install.php dans le navigateur
  * ⚠️ SUPPRIMER CE FICHIER APRÈS L'INSTALLATION
  */
 

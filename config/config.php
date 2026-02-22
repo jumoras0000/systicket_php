@@ -13,7 +13,7 @@ define('DB_CHARSET', 'utf8mb4');
 // Configuration de l'application
 define('APP_NAME', 'Systicket');
 define('APP_VERSION', '2.0.0');
-define('APP_URL', '/systicket2');
+define('APP_URL', '/systicket_php');
 define('APP_SECRET', 'systicket_secret_key_change_me_in_production');
 
 // Chemin absolu vers la racine du projet

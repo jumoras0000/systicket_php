@@ -6,8 +6,8 @@
     'use strict';
 
     var CFG = window.SYSTICKET || {};
-    var API = CFG.apiUrl || '/systicket2/api';
-    var BASE = CFG.baseUrl || '/systicket2';
+    var API = CFG.apiUrl || '/systicket_php/api';
+    var BASE = CFG.baseUrl || '/systicket_php';
     var CSRF = CFG.csrfToken || '';
 
     // ========================================

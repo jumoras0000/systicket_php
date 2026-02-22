@@ -2,7 +2,7 @@
 (function() {
     'use strict';
     
-    var BASE = (window.SYSTICKET && window.SYSTICKET.baseUrl) || '/systicket2';
+    var BASE = (window.SYSTICKET && window.SYSTICKET.baseUrl) || '/systicket_php';
     
     /* Configuration des différents rôles et leurs permissions */
     var rolesConfig = {
