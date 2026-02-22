@@ -23,8 +23,9 @@
 
     /* Initialise les filtres et les boutons au chargement de la page */
     function init() {
-        /* Restaure les filtres sauvegardés */
-        var saved = window.AppData && AppData.getSession('rapports_filters');
+        /* Restaure les filtres sauvegardés depuis sessionStorage */
+        var savedStr = sessionStorage.getItem('rapports_filters');
+        var saved = savedStr ? JSON.parse(savedStr) : null;
         if (saved) {
             var from = document.getElementById('report-date-from');
             var to = document.getElementById('report-date-to');
@@ -52,15 +53,12 @@
                 var range = (from && from.value) ? from.value : '';
                 if (to && to.value) range += ' — ' + to.value;
                 range = range.trim();
-                if (window.AppData) {
-                    AppData.setSession('rapports_filters', {
-                        from: from ? from.value : '',
-                        to: to ? to.value : '',
-                        period: period ? period.value : ''
-                    });
-                }
+                sessionStorage.setItem('rapports_filters', JSON.stringify({
+                    from: from ? from.value : '',
+                    to: to ? to.value : '',
+                    period: period ? period.value : ''
+                }));
                 showReportFeedback(range || periodText || 'Filtres appliqués', 'success');
-                // Déclencher la mise à jour des rapports
                 if (window.updateReports) {
                     window.updateReports();
                 } else {
@@ -74,12 +72,11 @@
                 var from = document.getElementById('report-date-from');
                 var to = document.getElementById('report-date-to');
                 var period = document.getElementById('report-period');
-                if (from) from.value = '2026-01-01';
+                if (from) from.value = '';
                 if (to) to.value = '';
                 if (period) period.selectedIndex = 0;
-                if (window.AppData) AppData.setSession('rapports_filters', null);
+                sessionStorage.removeItem('rapports_filters');
                 showReportFeedback('Tous les filtres réinitialisés.', 'success');
-                // Déclencher la mise à jour des rapports
                 if (window.updateReports) {
                     window.updateReports();
                 } else {

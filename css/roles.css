@@ -118,39 +118,46 @@
 /* Messages d'information pour les restrictions */
 .role-restriction-notice {
     display: none;
-    padding: var(--spacing-md);
-    background: var(--bg-tertiary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: #fffbeb;
+    border: 1px solid #fde68a;
     border-left: 3px solid var(--color-warning);
     margin-bottom: var(--spacing-lg);
     border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    color: #92400e;
+    line-height: 1.5;
 }
 
 .role-restriction-notice.show {
     display: block;
 }
 
-/* Badge de rôle dans le header */
+/* Badge de rôle dans le header — surcharge via style.css (gradient pills) */
+/* Ces styles servent de fallback si style.css n'est pas chargé */
 .user-role-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: var(--font-size-xs);
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
     text-transform: uppercase;
-    border-radius: var(--border-radius-sm);
-    margin-left: var(--spacing-sm);
+    letter-spacing: 0.06em;
+    border-radius: var(--border-radius-full, 9999px);
+    margin-left: var(--spacing-xs, 4px);
 }
 
 .user-role-badge.admin {
-    background: var(--color-primary);
-    color: white;
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #7c3aed;
 }
 
 .user-role-badge.collaborateur {
-    background: var(--color-info);
-    color: white;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #2563eb;
 }
 
 .user-role-badge.client {
-    background: var(--color-secondary);
-    color: white;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #059669;
 }

@@ -41,6 +41,20 @@
                 var main = document.getElementById('main-content');
                 if (!newMain || !main) { window.location.href = url; return; }
                 main.innerHTML = newMain.innerHTML;
+
+                // Exécuter les scripts inline du nouveau contenu (window.CLIENT_ID, etc.)
+                var scripts = main.querySelectorAll('script');
+                for (var i = 0; i < scripts.length; i++) {
+                    var oldScript = scripts[i];
+                    var newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                }
+
                 var newBody = doc.body;
                 if (newBody) {
                     var title = doc.querySelector('title');
@@ -75,13 +89,22 @@
         var href = link.getAttribute('href') || '';
         if (href.indexOf('#') === 0) return false;
         try {
+            var base = (window.SYSTICKET && window.SYSTICKET.baseUrl) || '/systicket2';
             var fullUrl = new URL(link.href, window.location.origin);
             var curUrl = new URL(window.location.href);
             if (fullUrl.origin !== curUrl.origin) return false;
+            // Ne pas intercepter les pages auth (connexion, inscription, etc.)
             if (fullUrl.pathname.indexOf('connexion') !== -1 || fullUrl.pathname.indexOf('inscription') !== -1) return false;
-            if (fullUrl.pathname.indexOf('index.html') !== -1 && fullUrl.pathname.indexOf('index.html') === fullUrl.pathname.length - 9) return false;
-            if (fullUrl.pathname.indexOf('.html') === -1) return false;
-            return true;
+            if (fullUrl.pathname.indexOf('mot-de-passe') !== -1) return false;
+            // Ne pas intercepter la home
+            if (fullUrl.pathname === base || fullUrl.pathname === base + '/') return false;
+            // Ne pas intercepter les fichiers statiques (.css, .js, .png, etc.)
+            if (/\.(css|js|png|jpg|jpeg|gif|svg|ico|pdf|zip)$/i.test(fullUrl.pathname)) return false;
+            // Ne pas intercepter les appels API
+            if (fullUrl.pathname.indexOf('/api/') !== -1) return false;
+            // Intercepter les liens internes du même base path
+            if (fullUrl.pathname.indexOf(base + '/') === 0) return true;
+            return false;
         } catch (err) { return false; }
     }
 
