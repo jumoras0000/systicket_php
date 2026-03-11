@@ -33,7 +33,7 @@
         <section class="home-hero">
             <div class="home-hero-inner">
                 <h1>Gérez vos tickets et projets en toute simplicité</h1>
-                <p class="home-hero-subtitle">Systicket est la plateforme de gestion de tickets, suivi du temps et facturation pour les ESN et agences web.</p>
+                <p class="home-hero-subtitle">Systicket est la plateforme de gestion de tickets, suivi du temps</p>
                 <div class="home-hero-actions">
                     <?php if (Auth::check()): ?>
                         <a href="<?= url('dashboard') ?>" class="btn btn-primary btn-lg">Accéder au tableau de bord</a>
