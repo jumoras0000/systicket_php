@@ -12,8 +12,22 @@ class DashboardModel {
         $this->db = Database::getInstance();
     }
 
-    public function getStats(?string $role = 'admin', ?int $userId = null, ?int $clientId = null): array {
+    public function getStats(?string $role = 'admin', ?int $userId = null, ?int $clientId = null, string $period = 'month'): array {
         $stats = [];
+
+        // Déterminer la plage de dates selon la période demandée
+        $today = date('Y-m-d');
+        if ($period === 'day') {
+            $startDate = $today;
+            $endDate = $today;
+        } elseif ($period === 'week') {
+            $startDate = date('Y-m-d', strtotime('monday this week'));
+            $endDate = date('Y-m-d', strtotime('sunday this week'));
+        } else {
+            // month
+            $startDate = date('Y-m-01');
+            $endDate = date('Y-m-t');
+        }
 
         // Tickets ouverts
         $sql = 'SELECT COUNT(*) FROM tickets t LEFT JOIN projets p ON t.project_id = p.id WHERE t.status IN ("new", "in-progress", "waiting-client")';
@@ -43,10 +57,10 @@ class DashboardModel {
         $stmt->execute($params);
         $stats['projets_active'] = (int)$stmt->fetchColumn();
 
-        // À valider ce mois
+        // À valider sur la période
         $sql = 'SELECT COUNT(*) FROM tickets t LEFT JOIN projets p ON t.project_id = p.id 
-                WHERE t.status = "to-validate" AND t.type = "billable"';
-        $params = [];
+            WHERE t.status = "to-validate" AND t.type = "billable" AND DATE(t.updated_at) BETWEEN ? AND ?';
+        $params = [$startDate, $endDate];
         if ($clientId) {
             $sql .= ' AND p.client_id = ?';
             $params[] = $clientId;
@@ -55,9 +69,9 @@ class DashboardModel {
         $stmt->execute($params);
         $stats['to_validate'] = (int)$stmt->fetchColumn();
 
-        // Heures ce mois
-        $sql = 'SELECT COALESCE(SUM(hours), 0) FROM temps WHERE MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())';
-        $params = [];
+        // Heures sur la période
+        $sql = 'SELECT COALESCE(SUM(hours), 0) FROM temps WHERE DATE(date) BETWEEN ? AND ?';
+        $params = [$startDate, $endDate];
         if ($role === 'collaborateur' && $userId) {
             $sql .= ' AND user_id = ?';
             $params[] = $userId;
@@ -71,9 +85,10 @@ class DashboardModel {
         $stmt = $this->db->query($sql);
         $stats['hours_budget'] = (float)$stmt->fetchColumn();
 
-        // Hours consumed overall (only validated tickets)
-        $sql = 'SELECT COALESCE(SUM(te.hours), 0) FROM temps te JOIN tickets tk ON te.ticket_id = tk.id WHERE tk.status = "validated"';
-        $stmt = $this->db->query($sql);
+        // Hours consumed in the period (only validated tickets)
+        $sql = 'SELECT COALESCE(SUM(te.hours), 0) FROM temps te JOIN tickets tk ON te.ticket_id = tk.id WHERE tk.status = "validated" AND DATE(te.date) BETWEEN ? AND ?';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$startDate, $endDate]);
         $stats['hours_consumed'] = (float)$stmt->fetchColumn();
 
         return $stats;

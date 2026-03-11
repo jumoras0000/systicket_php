@@ -24,7 +24,8 @@ $clientId = ($role === 'client') ? $userId : null;
 
 switch ($action) {
     case 'stats':
-        jsonResponse(['success' => true, 'data' => $model->getStats($role, $userId, $clientId)]);
+        $period = $_GET['period'] ?? 'month';
+        jsonResponse(['success' => true, 'data' => $model->getStats($role, $userId, $clientId, $period)]);
         break;
 
     case 'tickets-by-status':
