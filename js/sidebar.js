@@ -1,4 +1,4 @@
-/* Gestion du menu latéral et navigation SPA globale - tous les liens internes sans rechargement */
+/* Gestion du menu latéral et navigation - tous les liens internes sans rechargement */
 (function() {
     'use strict';
 

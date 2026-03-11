@@ -227,7 +227,6 @@ CREATE TABLE `profil_pending` (
 -- DONNEES DE DEMONSTRATION
 -- Mot de passe pour TOUS les comptes : password
 -- Le client = utilisateur avec role='client'
--- projets.client_id et contrats.client_id referencent users.id
 -- ============================================================
 
 INSERT INTO `users` (`id`, `last_name`, `first_name`, `email`, `password`, `role`, `status`, `phone`, `last_login`) VALUES
@@ -247,7 +246,7 @@ INSERT INTO `users` (`id`, `last_name`, `first_name`, `email`, `password`, `role
 
 INSERT INTO `projets` (`id`, `name`, `description`, `client_id`, `status`, `start_date`, `end_date`, `manager_id`) VALUES
 (1,  'Site e-commerce',      'Developpement d''un site e-commerce complet avec panier, paiement et back-office.',              3,  'active',    '2025-01-15', '2025-06-30', 1),
-(2,  'Application mobile',   'Application mobile cross-platform (iOS/Android) avec API REST.',                                  11, 'active',    '2025-02-01', '2025-08-31', 2),
+(2,  'Application mobile',   'Application mobile cross-platform ',                                  11, 'active',    '2025-02-01', '2025-08-31', 2),
 (3,  'Refonte site vitrine', 'Refonte complete du site vitrine : design, integration et referencement.',                        3,  'completed', '2024-10-01', '2025-01-15', 1),
 (4,  'Intranet RH',          'Mise en place d''un intranet pour la gestion RH.',                                                4,  'active',    '2025-03-01', '2025-09-30', 2),
 (5,  'ERP Logistique',       'Deploiement d''un ERP pour la gestion logistique.',                                               5,  'active',    '2025-04-15', '2025-12-31', 6),

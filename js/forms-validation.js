@@ -1,4 +1,4 @@
-/* Validation côté client des formulaires - version PHP (pas de persistance localStorage) */
+/* Validation côté client des formulaires  */
 (function() {
     'use strict';
 

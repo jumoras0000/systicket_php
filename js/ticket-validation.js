@@ -1,4 +1,4 @@
-/* Gestion des boutons Valider et Refuser pour les tickets - version PHP/API */
+/* Gestion des boutons Valider et Refuser pour les tickets  */
 (function() {
     'use strict';
 
@@ -19,9 +19,6 @@
         }, 3000);
     }
 
-    /* Les boutons de validation sont maintenant gérés via onclick dans app.js
-       (window.validateTicket et window.refuseTicket).
-       Ce fichier fournit uniquement le toast de feedback. */
     window.showValidationMessage = showMessage;
 
     /* Démarre quand la page est chargée */

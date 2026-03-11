@@ -1,6 +1,6 @@
 <?php
 /**
- * Page de connexion (standalone, pas de layout)
+ * Page de connexion 
  */
 // $loginError peut être défini par index.php lors d'un POST échoué
 $error = ($loginError ?? null) ?: getFlash('error');

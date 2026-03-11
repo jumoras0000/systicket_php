@@ -1,6 +1,6 @@
 <?php
 /**
- * Conditions générales d'utilisation (standalone)
+ * Conditions générales d'utilisation 
  */
 ?>
 <!DOCTYPE html>

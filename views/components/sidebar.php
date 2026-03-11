@@ -1,6 +1,6 @@
 <?php
 /**
- * Composant Sidebar (admin/collaborateur)
+ * Composant Sidebar 
  */
 $pageName = $pageName ?? '';
 ?>

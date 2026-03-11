@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - Connexion à la base de données (PDO Singleton)
+*Connexion à la base de données (PDO Singleton)
  */
 
 require_once __DIR__ . '/config.php';
@@ -20,7 +20,7 @@ class Database {
             try {
                 self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
             } catch (PDOException $e) {
-                die('Erreur de connexion à la base de données : ' . $e->getMessage());
+                die('Erreur de connexion a la base de données : ' . $e->getMessage());
             }
         }
         return self::$instance;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Composant Sidebar Client (navigation réduite)
+ * Composant Sidebar Client 
  */
 $pageName = $pageName ?? '';
 ?>

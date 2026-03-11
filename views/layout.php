@@ -1,8 +1,5 @@
 <?php
-/**
- * Systicket 2.0 - Layout principal (pages authentifiées)
- * Variables attendues: $pageContent (chemin vers la vue), $pageName (slug de page)
- */
+
 $flash = getFlash();
 $currentUser = Auth::user();
 $userRole = Auth::role();

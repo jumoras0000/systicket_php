@@ -1,10 +1,6 @@
-/* ============================================================
-   SYSTICKET 2.0 — Design System Professionnel
-   Palette moderne, animations fluides, responsive-first
-   ============================================================ */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* ── Variables CSS ─────────────────────────────────────────── */
 :root {
     /* Couleurs principales */
     --color-primary: #2563eb;
@@ -104,7 +100,7 @@
 }
 
 
-/* ── Reset & Base ──────────────────────────────────────────── */
+/* Reset & Base  */
 *,
 *::before,
 *::after {
@@ -350,14 +346,14 @@ img {
 }
 
 
-/* ── Layout ────────────────────────────────────────────────── */
+/*  Layout */
 .container {
     display: flex;
     min-height: calc(100vh - var(--header-height));
 }
 
 
-/* ── Sidebar ───────────────────────────────────────────────── */
+/* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--bg-primary);
@@ -462,7 +458,7 @@ img {
 }
 
 
-/* ── Boutons ───────────────────────────────────────────────── */
+/* Boutons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -583,8 +579,7 @@ img {
     background: var(--bg-tertiary);
 }
 
-
-/* ── Badges ────────────────────────────────────────────────── */
+/*  Badges  */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -654,7 +649,7 @@ img {
 }
 
 
-/* ── Cartes & Widgets ──────────────────────────────────────── */
+/*  Cartes & Widgets  */
 .card,
 .stat-card,
 .widget-card,
@@ -804,7 +799,7 @@ img {
 }
 
 
-/* ── Tableaux ──────────────────────────────────────────────── */
+/* Tableaux */
 .table-container {
     background: var(--bg-primary);
     border-radius: var(--border-radius);
@@ -861,7 +856,7 @@ img {
 }
 
 
-/* ── Formulaires ───────────────────────────────────────────── */
+/* Formulaires */
 .form-group {
     margin-bottom: var(--spacing-lg);
 }
@@ -1067,7 +1062,7 @@ img {
 }
 
 
-/* ── Page Header ───────────────────────────────────────────── */
+/* Page Header */
 .page-header-flex,
 .page-header {
     display: flex;
@@ -1123,7 +1118,7 @@ img {
 }
 
 
-/* ── Filtres ───────────────────────────────────────────────── */
+/* Filtres */
 .filters-bar {
     display: flex;
     gap: var(--spacing-md);
@@ -1238,7 +1233,7 @@ img {
 }
 
 
-/* ── Dashboard ─────────────────────────────────────────────── */
+/* Dashboard */
 .widget-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -1486,7 +1481,7 @@ img {
 }
 
 
-/* ── List Toolbar ──────────────────────────────────────────── */
+/* List Toolbar  */
 .list-toolbar {
     display: flex;
     justify-content: space-between;
@@ -1571,7 +1566,7 @@ img {
 .list-summary-card-muted { border-left: none; }
 
 
-/* ── Timeline ──────────────────────────────────────────────── */
+/* Timeline */
 .timeline {
     list-style: none;
     padding: 0;
@@ -1632,7 +1627,7 @@ img {
 }
 
 
-/* ── Time Period nav ───────────────────────────────────────── */
+/*  Time Period nav  */ 
 .time-period-nav {
     display: flex;
     align-items: center;
@@ -1671,7 +1666,7 @@ img {
 }
 
 
-/* ── Progress Bar ──────────────────────────────────────────── */
+/*  Progress Bar  */
 .progress-bar {
     width: 100%;
     height: 8px;
@@ -1695,7 +1690,7 @@ img {
 }
 
 
-/* ── Pagination ────────────────────────────────────────────── */
+/*  Pagination  */
 .pagination {
     display: flex;
     justify-content: center;
@@ -1711,7 +1706,7 @@ img {
 }
 
 
-/* ── Ticket Detail ─────────────────────────────────────────── */
+/*  Ticket Detail  */
 .ticket-header {
     display: flex;
     justify-content: space-between;
@@ -1926,7 +1921,7 @@ img {
 }
 
 
-/* ── Projects Grid ─────────────────────────────────────────── */
+/*  Projects Grid  */
 .projects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -2033,7 +2028,7 @@ img {
 }
 
 
-/* ── Auth Pages ────────────────────────────────────────────── */
+/*  Auth Pages  */
 .auth-page {
     min-height: 100vh;
     height: 100vh;
@@ -2807,7 +2802,7 @@ img {
 }
 
 
-/* ── Responsive: Tablet ────────────────────────────────────── */
+/*  Responsive: Tablet  */
 @media screen and (min-width: 768px) and (max-width: 1023px) {
     .sidebar {
         width: var(--sidebar-width-mobile);
@@ -2881,7 +2876,7 @@ img {
 }
 
 
-/* ── Utilitaires: Logo / Avatar ────────────────────────────── */
+/* Logo / Avatar  */
 .logo-small {
     font-size: 0.75rem;
     font-weight: 800;
@@ -2908,7 +2903,7 @@ img {
 }
 
 
-/* ── Utilitaires: Texte ────────────────────────────────────── */
+/*   Texte  */
 .text-large,
 .text-xxlarge {
     font-size: 1.5rem;
@@ -3008,7 +3003,7 @@ img {
 .text-light { color: var(--text-light); }
 
 
-/* ── Utilitaires: Spacing ──────────────────────────────────── */
+/*  Spacing  */
 .section-spacing,
 .card-spacing {
     margin-top: var(--spacing-xl);
@@ -3158,7 +3153,7 @@ img {
 }
 
 
-/* ── 404 / Error ───────────────────────────────────────────── */
+/*  404 Error  */
 .error-page,
 .redirect-page {
     display: flex;
@@ -3226,7 +3221,7 @@ img {
 }
 
 
-/* ── Landing Page (Home) ───────────────────────────────────── */
+/*  Home Page  */
 .home-page {
     min-height: 100vh;
     background: var(--bg-primary);
@@ -3479,7 +3474,7 @@ img {
 }
 
 
-/* ── Utilitaires: Margins ──────────────────────────────────── */
+/* Margins  */
 .mt-sm { margin-top: var(--spacing-sm); }
 .mt-md { margin-top: var(--spacing-md); }
 .mt-lg { margin-top: var(--spacing-lg); }
@@ -3491,7 +3486,7 @@ img {
 .mb-xl { margin-bottom: var(--spacing-xl); }
 
 
-/* ── Utilitaires: Display ──────────────────────────────────── */
+/* Display  */
 .hidden {
     display: none;
 }
@@ -3509,7 +3504,7 @@ img {
 }
 
 
-/* ── Rapports ──────────────────────────────────────────────── */
+/*  Rapports  */
 .reports-toc-title {
     font-size: var(--font-size-lg);
     font-weight: 700;
@@ -3626,7 +3621,8 @@ img {
 }
 
 
-/* ── Alertes ───────────────────────────────────────────────── */
+
+/*  Alertes  */
 .alert {
     display: flex;
     align-items: flex-start;
@@ -3671,7 +3667,7 @@ img {
 }
 
 
-/* ── Empty State ───────────────────────────────────────────── */
+/*  Empty State  */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -3724,7 +3720,7 @@ img {
 }
 
 
-/* ── Accessibility ─────────────────────────────────────────── */
+/*  Accessibility  */
 .skip-link {
     position: absolute;
     top: -100%;
@@ -3754,7 +3750,7 @@ textarea:focus-visible {
 }
 
 
-/* ── Tooltips ──────────────────────────────────────────────── */
+/*  Tooltips  */
 [data-tooltip] {
     position: relative;
 }
@@ -3784,7 +3780,7 @@ textarea:focus-visible {
 }
 
 
-/* ── Extras ────────────────────────────────────────────────── */
+/*  Extras  */
 .ticket-form {
     margin-top: var(--spacing-lg);
 }
@@ -3889,7 +3885,7 @@ textarea:focus-visible {
 }
 
 
-/* ── Responsive extra ──────────────────────────────────────── */
+/*  Responsive extra  */
 @media screen and (max-width: 767px) {
     .auth-form-row-2 {
         grid-template-columns: 1fr !important;
@@ -3941,7 +3937,7 @@ textarea:focus-visible {
 }
 
 
-/* ── Print ─────────────────────────────────────────────────── */
+/*  Print  */
 @media print {
     .header,
     .sidebar,

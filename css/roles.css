@@ -133,7 +133,7 @@
     display: block;
 }
 
-/* Badge de rôle dans le header — surcharge via style.css (gradient pills) */
+
 /* Ces styles servent de fallback si style.css n'est pas chargé */
 .user-role-badge {
     display: inline-flex;

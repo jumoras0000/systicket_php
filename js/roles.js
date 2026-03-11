@@ -1,4 +1,4 @@
-/* Gestion des rôles utilisateurs et permissions - version PHP */
+/* Gestion des rôles utilisateurs et permissions */
 (function() {
     'use strict';
     

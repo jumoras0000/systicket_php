@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - Modèle Utilisateur
+ * Modèle Utilisateur
  */
 
 require_once __DIR__ . '/../config/database.php';

@@ -1,4 +1,4 @@
-/* Variables CSS - Design professionnel Systicket */
+/* Variables CSS */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 :root {
@@ -98,7 +98,7 @@ img {
 }
 
 
-/* En-tête de la page - barre fixe professionnelle */
+/* En-tête de la page - barre fixe  */
 .header {
     height: var(--header-height);
     background: var(--bg-primary);
@@ -286,7 +286,7 @@ img {
     min-height: calc(100vh - var(--header-height));
 }
 
-/* Barre latérale - menu de navigation épuré */
+/* Barre latérale - menu de navigation  */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--bg-primary);
@@ -360,7 +360,7 @@ img {
 }
 
 
-/* Boutons - design épuré et professionnel */
+/* Boutons - design */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -456,7 +456,7 @@ img {
 }
 
 
-/* Badges et étiquettes - design épuré */
+/* Badges et étiquettes */
 .badge {
     display: inline-block;
     padding: 4px 10px;
@@ -526,7 +526,7 @@ img {
 }
 
 
-/* Cartes - design moderne et cohérent */
+/* Cartes - design  */
 .card,
 .stat-card,
 .widget-card,
@@ -641,7 +641,7 @@ img {
 
 
 
-/* Tableaux - présentation professionnelle */
+/* Tableaux - présentation  */
 .table-container {
     background: var(--bg-primary);
     border-radius: var(--border-radius);
@@ -1480,7 +1480,7 @@ img {
 
 
 
-/* En-tête des pages de détail (tickets, projets, clients...) */
+/* En-tête des pages de détail  */
 .ticket-header {
     display: flex;
     justify-content: space-between;
@@ -2841,7 +2841,7 @@ img {
 }
 
 
-/* ===== Page d'erreur ===== */
+/* Page d'erreur */
 .error-page,
 .redirect-page {
     display: flex;
@@ -2907,7 +2907,7 @@ img {
 }
 
 
-/* ===== Page d'accueil (Landing) ===== */
+/* Page d'accueil  */
 .home-page {
     min-height: 100vh;
     background: var(--bg-secondary);
@@ -3287,7 +3287,7 @@ img {
     margin-bottom: var(--spacing-lg);
 }
 
-/* Alertes génériques (success, error, warning, info) */
+/* Alertes génériques  */
 .alert {
     display: flex;
     align-items: flex-start;

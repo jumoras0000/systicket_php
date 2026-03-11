@@ -1,7 +1,4 @@
 <?php
-/**
- * Systicket 2.0 - Gestion de l'authentification et des sessions
- */
 
 require_once __DIR__ . '/../config/database.php';
 

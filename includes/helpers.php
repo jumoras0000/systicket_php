@@ -1,7 +1,4 @@
 <?php
-/**
- * Systicket 2.0 - Fonctions utilitaires
- */
 
 /**
  * Échappe une valeur pour affichage HTML
@@ -205,7 +202,7 @@ function flash(string $type, string $message): void {
 
 /**
  * Récupère et supprime le flash message
- * Si $type est fourni, retourne uniquement le message si le type correspond (en tant que string)
+ * Si $type est fourni, retourne uniquement le message si le type correspond 
  * Sinon retourne le tableau complet ['type', 'message'] ou null
  */
 function getFlash(?string $type = null) {
@@ -216,7 +213,7 @@ function getFlash(?string $type = null) {
             unset($_SESSION['flash']);
             return $flash;
         }
-        // Type spécifié: retourner le message seulement si le type correspond
+      
         if ($flash['type'] === $type) {
             unset($_SESSION['flash']);
             return $flash['message'];

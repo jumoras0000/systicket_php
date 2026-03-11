@@ -1,8 +1,5 @@
 <?php
-/**
- * Systicket 2.0 - Point d'entrée principal (Router)
- * Toutes les requêtes passent par ce fichier via .htaccess
- */
+
 
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/helpers.php';

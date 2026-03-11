@@ -51,7 +51,7 @@ $role = Auth::role();
 <section class="filters-section">
     <div class="filters-bar">
         <input type="search" placeholder="Rechercher un ticket..." class="search-input" id="ticket-search" aria-label="Recherche">
-        <select class="filter-select" id="filter-status" aria-label="Filtrer par statut">
+        <select class="filter-select" id="filter-status" data-filter="status" aria-label="Filtrer par statut">
             <option value="">Tous les statuts</option>
             <option value="new">Nouveau</option>
             <option value="in-progress">En cours</option>
@@ -61,7 +61,7 @@ $role = Auth::role();
             <option value="validated">Validé</option>
             <option value="refused">Refusé</option>
         </select>
-        <select class="filter-select" id="filter-priority" aria-label="Filtrer par priorité">
+        <select class="filter-select" id="filter-priority" data-filter="priority" aria-label="Filtrer par priorité">
             <option value="">Toutes les priorités</option>
             <option value="low">Faible</option>
             <option value="normal">Normale</option>
@@ -73,7 +73,7 @@ $role = Auth::role();
             <option value="included">Inclus</option>
             <option value="billable">Facturable</option>
         </select>
-        <select class="filter-select" id="filter-project" aria-label="Filtrer par projet">
+        <select class="filter-select" id="filter-project" data-filter="project_id" aria-label="Filtrer par projet">
             <option value="">Tous les projets</option>
         </select>
     </div>
