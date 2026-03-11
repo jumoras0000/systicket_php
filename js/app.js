@@ -1,7 +1,4 @@
-/**
- * Systicket 2.0 - Application principale
- * Gère toutes les communications API et le rendu dynamique
- */
+
 (function() {
     'use strict';
 
@@ -10,10 +7,7 @@
     var BASE = CFG.baseUrl || '/systicket_php';
     var CSRF = CFG.csrfToken || '';
 
-    // ========================================
-    // UTILITAIRES API
-    // ========================================
-
+ 
     function apiUrl(endpoint) {
         return API + '/' + endpoint;
     }
@@ -85,9 +79,7 @@
         });
     }
 
-    // ========================================
-    // UTILITAIRES GÉNÉRAUX
-    // ========================================
+// Utilitaires généraux
 
     function esc(str) {
         if (str === null || str === undefined) return '';
@@ -108,10 +100,9 @@
         return parseFloat(h).toFixed(1) + 'h';
     }
 
-    // Map French form field names to English API field names
+   
     function mapFormData(entity, data) {
-        // Form field names now use English directly.
-        // This map only handles any remaining legacy French form fields.
+        
         var maps = {
             ticket: {},
             projet: {},
@@ -130,10 +121,8 @@
         return mapped;
     }
 
-    // ========================================
-    // BADGES
-    // ========================================
-
+       // BADGES
+    
     function statusBadge(status) {
         var map = {
             'new':            '<span class="badge badge-info">Nouveau</span>',
@@ -180,10 +169,8 @@
         return map[status] || '<span class="badge">' + esc(status) + '</span>';
     }
 
-    // ========================================
     // MESSAGES FORMULAIRE
-    // ========================================
-
+   
     function showFormMessage(formEl, msg, type) {
         var msgEl = formEl.querySelector('.form-messages');
         if (!msgEl) return;
@@ -196,10 +183,8 @@
         if (msgEl) msgEl.innerHTML = '';
     }
 
-    // ========================================
-    // PAGE: DASHBOARD
-    // ========================================
-
+      // PAGE: DASHBOARD
+  
     function initDashboard() {
         if (document.body.getAttribute('data-page') !== 'dashboard') return;
 
@@ -319,10 +304,8 @@
         }).catch(function() {});
     }
 
-    // ========================================
-    // PAGE: TICKETS
-    // ========================================
-
+      // PAGE: TICKETS
+  
     function initTicketsList() {
         if (document.body.getAttribute('data-page') !== 'tickets') return;
         if (document.getElementById('ticket-form')) return;
@@ -409,10 +392,8 @@
         });
     }
 
-    // ========================================
-    // PAGE: TICKET DETAIL
-    // ========================================
-
+      // PAGE: TICKET DETAIL
+  
     function initTicketDetail() {
         if (typeof window.TICKET_ID === 'undefined' || !window.TICKET_ID) return;
 
@@ -534,10 +515,8 @@
         container.innerHTML = html;
     }
 
-    // ========================================
-    // PAGE: TICKET FORM
-    // ========================================
-
+      // PAGE: TICKET FORM
+  
     function initTicketForm() {
         var form = document.getElementById('ticket-form');
         if (!form) return;
@@ -638,10 +617,8 @@
         });
     }
 
-    // ========================================
-    // PAGE: PROJETS
-    // ========================================
-
+      // PAGE: PROJETS
+  
     function initProjetsList() {
         if (document.body.getAttribute('data-page') !== 'projets') return;
         if (document.getElementById('project-form')) return;
@@ -734,10 +711,8 @@
         });
     }
 
-    // ========================================
-    // PAGE: PROJET DETAIL
-    // ========================================
-
+      // PAGE: PROJET DETAIL
+  
     function initProjetDetail() {
         if (typeof window.PROJET_ID === 'undefined' || !window.PROJET_ID) return;
         var id = window.PROJET_ID;
@@ -821,10 +796,8 @@
         }).catch(function() {});
     }
 
-    // ========================================
-    // PAGE: PROJET FORM
-    // ========================================
-
+      // PAGE: PROJET FORM
+  
     function initProjetForm() {
         var form = document.getElementById('project-form');
         if (!form) return;
@@ -915,10 +888,8 @@
         });
     }
 
-    // ========================================
-    // PAGE: CONTRATS
-    // ========================================
-
+      // PAGE: CONTRATS
+  
     function initContratsList() {
         if (document.body.getAttribute('data-page') !== 'contrats') return;
         if (document.getElementById('contrat-form')) return;
@@ -1100,10 +1071,8 @@
         });
     }
 
-    // ========================================
-    // PAGE: UTILISATEURS
-    // ========================================
-
+      // PAGE: UTILISATEURS
+  
     function initUsersList() {
         if (document.body.getAttribute('data-page') !== 'utilisateurs') return;
         if (document.getElementById('user-form')) return;
@@ -1225,10 +1194,8 @@
         }
     }
 
-    // ========================================
-    // PAGE: TEMPS
-    // ========================================
-
+      // PAGE: TEMPS
+  
     function initTemps() {
         if (document.body.getAttribute('data-page') !== 'temps') return;
 
@@ -1387,10 +1354,8 @@
         }
     };
 
-    // ========================================
-    // PAGE: VALIDATION
-    // ========================================
-
+      // PAGE: VALIDATION
+  
     function initValidation() {
         if (document.body.getAttribute('data-page') !== 'ticket-validation') return;
 
@@ -1540,10 +1505,8 @@
             .catch(function(err) { alert(err.message); });
     };
 
-    // ========================================
-    // PAGE: PROFIL
-    // ========================================
-
+      // PAGE: PROFIL
+  
     function initProfil() {
         if (document.body.getAttribute('data-page') !== 'profil') return;
 
@@ -1592,10 +1555,8 @@
         }
     }
 
-    // ========================================
-    // HELPERS
-    // ========================================
-
+      // HELPERS
+  
     function setTextById(id, text) {
         var el = document.getElementById(id);
         if (el) el.textContent = text;
@@ -1621,10 +1582,8 @@
         };
     }
 
-    // ========================================
-    // PAGE: RAPPORTS
-    // ========================================
-
+      // PAGE: RAPPORTS
+  
     function initRapports() {
         if (document.body.getAttribute('data-page') !== 'rapports') return;
 
@@ -1853,10 +1812,8 @@
         });
     }
 
-    // ========================================
-    // INITIALISATION GLOBALE
-    // ========================================
-
+      // INITIALISATION GLOBALE
+  
     function initAll() {
         initDashboard();
         initTicketsList();
