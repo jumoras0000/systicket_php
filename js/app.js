@@ -1204,36 +1204,36 @@
 
       // PAGE: TEMPS
   
-    function initTemps() {
-        if (document.body.getAttribute('data-page') !== 'temps') return;
+function initTemps() {
+    if (document.body.getAttribute('data-page') !== 'temps') return;
 
-        // Charger tickets
-        apiGet('tickets.php').then(function(tickets) {
-            var sel = document.getElementById('time-ticket');
-            if (!sel) return;
-            if (tickets && tickets.length) {
-                tickets.forEach(function(t) {
-                    var opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.textContent = '#' + t.id + ' - ' + (t.title || '');
-                    sel.appendChild(opt);
-                });
-            }
-        });
+    // Charger tickets pour le formulaire
+    apiGet('tickets.php').then(function(tickets) {
+        var sel = document.getElementById('time-ticket');
+        if (!sel) return;
+        if (tickets && tickets.length) {
+            tickets.forEach(function(t) {
+                var opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = '#' + t.id + ' - ' + (t.title || '');
+                sel.appendChild(opt);
+            });
+        }
+    });
 
         // Charger projets dans filtre
-        apiGet('projets.php').then(function(data) {
-            var sel = document.getElementById('filter-project');
-            if (sel && data) {
-                var projets = Array.isArray(data) ? data : [];
-                projets.forEach(function(p) {
-                    var opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.textContent = p.name;
-                    sel.appendChild(opt);
-                });
-            }
-        });
+    apiGet('projets.php').then(function(data) {
+        var sel = document.getElementById('filter-project');
+        if (sel && data) {
+            var projets = Array.isArray(data) ? data : [];
+            projets.forEach(function(p) {
+                var opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                sel.appendChild(opt);
+            });
+        }
+    });
 
         loadTemps();
 
@@ -1326,43 +1326,198 @@
             });
         }
     }
-
-    function loadTemps() {
-        apiGet('temps.php').then(function(entries) {
-            var tbody = document.getElementById('temps-tbody');
-            if (!tbody) return;
-            if (!entries || !entries.length) {
-                tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucune entrée de temps.</td></tr>';
-                return;
-            }
-            var html = '';
-            entries.forEach(function(e, index) {
-                html += '<tr class="time-row" data-project="' + (e.project_id || '') + '" data-row-index="' + index + '">';
-                html += '<td>' + formatDate(e.date) + '</td>';
-                html += '<td>' + esc(e.user_name || '—') + '</td>';
-                html += '<td><a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">' + esc(e.ticket_title || ('#' + e.ticket_id)) + '</a></td>';
-                html += '<td>' + esc(e.project_name || '—') + '</td>';
-                html += '<td>' + formatHours(e.hours) + '</td>';
-                html += '<td>' + esc(e.description || '—') + '</td>';
-                html += '<td>';
-                html += '<button class="btn btn-text btn-small btn-danger" onclick="deleteTemps(' + e.id + ')">Supprimer</button>';
-                html += '</td>';
-                html += '</tr>';
-            });
-            tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
-        }).catch(function() {
-            var tbody = document.getElementById('temps-tbody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
-        });
+function loadTemps() {
+    var params = [];
+    
+    // Récupérer les valeurs des filtres
+    var search = document.getElementById('temps-search');
+    if (search && search.value) {
+        params.push('search=' + encodeURIComponent(search.value));
+    }
+    
+    var filterProject = document.getElementById('filter-project');
+    if (filterProject && filterProject.value) {
+        params.push('project_id=' + encodeURIComponent(filterProject.value));
     }
 
+    var url = 'temps.php' + (params.length ? '?' + params.join('&') : '');
+    
+    apiGet(url).then(function(entries) {
+        var tbody = document.getElementById('temps-tbody');
+        var countEl = document.getElementById('temps-count');
+        
+        if (!tbody) return;
+
+        if (!entries || !entries.length) {
+            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucune entrée de temps.</td></tr>';
+            if (countEl) countEl.textContent = '0';
+            return;
+        }
+
+        if (countEl) countEl.textContent = entries.length;
+
+        var html = '';
+        var totalHours = 0;
+        
+        entries.forEach(function(e, index) {
+            totalHours += parseFloat(e.hours || 0);
+            
+            html += '<tr class="time-row" data-project="' + (e.project_id || '') + '" data-row-index="' + index + '">';
+            html += '<td>' + formatDate(e.date) + '</td>';
+            html += '<td>' + esc(e.user_name || '—') + '</td>';
+            html += '<td>';
+            if (e.ticket_id) {
+                html += '<a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">#' + e.ticket_id + '</a>';
+            } else {
+                html += '—';
+            }
+            html += '</td>';
+            html += '<td>' + esc(e.project_name || '—') + '</td>';
+            html += '<td>' + formatHours(e.hours) + '</td>';
+            html += '<td>' + esc(e.description || '—') + '</td>';
+            html += '<td>';
+            
+            // Actions (seulement pour l'utilisateur qui a créé l'entrée ou admin)
+            if (CFG.user && (CFG.user.role === 'admin' || CFG.user.id == e.user_id)) {
+                html += '<button type="button" class="btn btn-icon btn-danger btn-small" onclick="deleteTimeEntry(' + e.id + ')" title="Supprimer">';
+                html += '🗑️</button>';
+            }
+            
+            html += '</td>';
+            html += '</tr>';
+        });
+
+        tbody.innerHTML = html;
+
+        // Mettre à jour le total
+        var totalEl = document.getElementById('temps-total-month');
+        if (totalEl) {
+            totalEl.textContent = formatHours(totalHours);
+        }
+
+    }).catch(function(err) {
+        var tbody = document.getElementById('temps-tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Erreur de chargement.</td></tr>';
+        }
+    });
+}
     window.deleteTemps = function(id) {
         if (confirm('Supprimer cette entrée ?')) {
             apiDelete('temps.php?id=' + id).then(function() { loadTemps(); });
         }
     };
+function deleteTimeEntry(id) {
+    if (!confirm('Supprimer cette entrée de temps ?')) return;
+    
+    apiDelete('temps.php?id=' + id).then(function() {
+        loadTemps(); // Recharger la liste
+        
+        // Recharger aussi les totaux
+        apiGet('temps.php?action=month-total').then(function(data) {
+            if (!data) return;
+            setTextById('temps-month', formatHours(data.total || 0));
+            setTextById('temps-total-month', formatHours(data.total || 0));
+        });
+    }).catch(function(err) {
+        alert('Erreur lors de la suppression: ' + err.message);
+    });
+}
 
+function loadUsers() {
+    var params = [];
+    
+    // Récupérer les valeurs des filtres
+    var search = document.getElementById('user-search');
+    if (search && search.value) {
+        params.push('search=' + encodeURIComponent(search.value));
+    }
+    
+    var filterRole = document.getElementById('filter-role');
+    if (filterRole && filterRole.value) {
+        params.push('role=' + encodeURIComponent(filterRole.value));
+    }
+    
+    var filterStatus = document.getElementById('filter-status');
+    if (filterStatus && filterStatus.value) {
+        params.push('status=' + encodeURIComponent(filterStatus.value));
+    }
+
+    var url = 'users.php' + (params.length ? '?' + params.join('&') : '');
+    
+    apiGet(url).then(function(users) {
+        var tbody = document.getElementById('users-tbody');
+        var countEl = document.getElementById('users-count');
+        
+        if (!tbody) return;
+
+        if (!users || !users.length) {
+            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucun utilisateur.</td></tr>';
+            if (countEl) countEl.textContent = '0';
+            return;
+        }
+
+        if (countEl) countEl.textContent = users.length;
+
+        var html = '';
+        users.forEach(function(u, index) {
+            var status = u.status || 'active';
+            var role = u.role || 'client';
+            
+            html += '<tr class="user-row" data-role="' + esc(role) + '" data-status="' + esc(status) + '" data-row-index="' + index + '">';
+            
+            // Utilisateur (nom + prénom)
+            html += '<td>';
+            html += '<div class="user-cell">';
+            html += '<strong>' + esc(u.first_name + ' ' + u.last_name) + '</strong>';
+            if (u.company) {
+                html += '<span class="user-company">' + esc(u.company) + '</span>';
+            }
+            html += '</div>';
+            html += '</td>';
+            
+            // Email
+            html += '<td><a href="mailto:' + esc(u.email) + '">' + esc(u.email) + '</a></td>';
+            
+            // Téléphone
+            html += '<td>' + esc(u.phone || '—') + '</td>';
+            
+            // Rôle
+            html += '<td><span class="badge badge-' + esc(role) + '">' + getRoleLabel(role) + '</span></td>';
+            
+            // Statut
+            var statusClass = status === 'active' ? 'success' : 'secondary';
+            var statusLabel = status === 'active' ? 'Actif' : 'Inactif';
+            html += '<td><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></td>';
+            
+            // Dernière connexion
+            html += '<td>' + (u.last_login ? formatDate(u.last_login) : '—') + '</td>';
+            
+            // Actions
+            html += '<td>';
+            html += '<a href="' + appUrl('user-form?id=' + u.id) + '" class="btn btn-icon btn-small" title="Modifier">✏️</a>';
+            html += '</td>';
+            
+            html += '</tr>';
+        });
+
+        tbody.innerHTML = html;
+
+    }).catch(function(err) {
+        var tbody = document.getElementById('users-tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Erreur de chargement.</td></tr>';
+        }
+    });
+}
+function getRoleLabel(role) {
+    var labels = {
+        'admin': 'Administrateur',
+        'collaborateur': 'Collaborateur',
+        'client': 'Client'
+    };
+    return labels[role] || role;
+}
       // PAGE: VALIDATION
   
     function initValidation() {
