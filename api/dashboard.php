@@ -37,7 +37,8 @@ switch ($action) {
     case 'hours-by-project':
         $filterUserId = ($role === 'collaborateur') ? $userId : null;
         $filterClientId = ($role === 'client') ? $clientId : null;
-        jsonResponse(['success' => true, 'data' => $model->getHoursByProject($filterUserId, $filterClientId)]);
+        $period = $_GET['period'] ?? null;
+        jsonResponse(['success' => true, 'data' => $model->getHoursByProject($filterUserId, $filterClientId, $period)]);
         break;
 
     case 'recent-tickets':

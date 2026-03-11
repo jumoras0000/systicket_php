@@ -187,13 +187,46 @@
   
     function initDashboard() {
         if (document.body.getAttribute('data-page') !== 'dashboard') return;
+        // Read initial period from active button
+        var activeBtn = document.querySelector('.btn-period-active');
+        var initialPeriod = (activeBtn && activeBtn.getAttribute('data-period')) || 'month';
+        loadDashboardStats(initialPeriod);
 
-        apiGet('dashboard.php?action=stats').then(function(data) {
+        // Bind period buttons to switch without reload
+        var periodButtons = document.querySelectorAll('.btn-period');
+        periodButtons.forEach(function(b) {
+            b.addEventListener('click', function(e) {
+                e.preventDefault();
+                var p = b.getAttribute('data-period') || 'month';
+                // Toggle active classes
+                periodButtons.forEach(function(x) { x.classList.remove('btn-period-active'); });
+                b.classList.add('btn-period-active');
+                loadDashboardStats(p);
+            });
+        });
+
+
+    function loadDashboardStats(period) {
+        apiGet('dashboard.php?action=stats&period=' + encodeURIComponent(period)).then(function(data) {
             if (!data) return;
             setTextById('dash-tickets-open', data.tickets_open || 0);
             setTextById('dash-projets-active', data.projets_active || 0);
             setTextById('dash-validation-count', data.to_validate || 0);
             setTextById('dash-hours-month', formatHours(data.hours_month || 0));
+
+            // Update labels for periods
+            var validateLabelEl = document.getElementById('dash-validate-label');
+            var hoursLabelEl = document.getElementById('dash-hours-label');
+            if (validateLabelEl) {
+                if (period === 'day') validateLabelEl.textContent = "À valider aujourd'hui";
+                else if (period === 'week') validateLabelEl.textContent = "À valider cette semaine";
+                else validateLabelEl.textContent = "À valider ce mois";
+            }
+            if (hoursLabelEl) {
+                if (period === 'day') hoursLabelEl.textContent = "Heures aujourd'hui";
+                else if (period === 'week') hoursLabelEl.textContent = "Heures cette semaine";
+                else hoursLabelEl.textContent = "Heures ce mois";
+            }
 
             // Populate hours gauge
             var gaugeEl = document.getElementById('dash-hours-gauge');
@@ -209,8 +242,33 @@
                 var progressText = gaugeEl.querySelector('.progress-text');
                 if (progressText) progressText.textContent = pct + '% consommé — ' + formatHours(remaining) + ' restantes';
             }
-        }).catch(function() {});
 
+            // Refresh hours-by-project chart for the selected period
+            apiGet('dashboard.php?action=hours-by-project&period=' + encodeURIComponent(period)).then(function(hdata) {
+                var container = document.getElementById('dash-hours-by-project');
+                if (!container) return;
+                if (!hdata || !hdata.length) { container.innerHTML = '<p class="text-secondary">Aucune donnée pour cette période.</p>'; return; }
+                var max = Math.max.apply(null, hdata.map(function(d) { return parseFloat(d.total || 0); }));
+                var total = hdata.reduce(function(s, d) { return s + parseFloat(d.total || 0); }, 0);
+                var colors = ['dashboard-chart-bar-primary', 'dashboard-chart-bar-blue', 'dashboard-chart-bar-green'];
+                var html = '<div class="dashboard-chart-bars">';
+                hdata.forEach(function(item, i) {
+                    var pct = max > 0 ? Math.round((parseFloat(item.total || 0) / max) * 100) : 0;
+                    html += '<div class="dashboard-chart-row">';
+                    html += '<span class="dashboard-chart-label">' + esc(item.name) + '</span>';
+                    html += '<div class="dashboard-chart-bar-wrap">';
+                    html += '<div class="dashboard-chart-bar ' + (colors[i % colors.length]) + '" style="width: ' + pct + '%;"></div>';
+                    html += '</div>';
+                    html += '<span class="dashboard-chart-value">' + formatHours(item.total) + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+                html += '<p class="dashboard-chart-total"><strong>Total : ' + formatHours(total) + '</strong></p>';
+                container.innerHTML = html;
+            }).catch(function() {});
+
+        }).catch(function() {});
+    }
         apiGet('dashboard.php?action=tickets-by-status').then(function(data) {
             var container = document.getElementById('dash-tickets-by-status');
             if (!container || !data || !data.length) return;

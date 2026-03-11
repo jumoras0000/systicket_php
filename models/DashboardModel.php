@@ -112,10 +112,30 @@ class DashboardModel {
         return $stmt->fetchAll();
     }
 
-    public function getHoursByProject(?int $userId = null, ?int $clientId = null): array {
+    public function getHoursByProject(?int $userId = null, ?int $clientId = null, ?string $period = null): array {
+        // Determine date range from period if provided
+        if ($period === 'day') {
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d');
+        } elseif ($period === 'week') {
+            $startDate = date('Y-m-d', strtotime('monday this week'));
+            $endDate = date('Y-m-d', strtotime('sunday this week'));
+        } elseif ($period === 'month') {
+            $startDate = date('Y-m-01');
+            $endDate = date('Y-m-t');
+        } else {
+            $startDate = null;
+            $endDate = null;
+        }
+
         $sql = 'SELECT p.name, COALESCE(SUM(te.hours), 0) as total
             FROM temps te JOIN projets p ON te.project_id = p.id WHERE 1=1';
         $params = [];
+        if ($startDate && $endDate) {
+            $sql .= ' AND DATE(te.date) BETWEEN ? AND ?';
+            $params[] = $startDate;
+            $params[] = $endDate;
+        }
         if ($userId) {
             $sql .= ' AND te.user_id = ?';
             $params[] = $userId;

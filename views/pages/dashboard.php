@@ -67,7 +67,7 @@ switch ($period) {
                 <span class="stat-value" id="dash-validation-count">—</span>
                 <span class="stat-trend stat-trend-up" id="dash-validation-trend">—</span>
             </div>
-            <div class="stat-label"><?= htmlspecialchars($label_validate) ?></div>
+            <div id="dash-validate-label" class="stat-label"><?= htmlspecialchars($label_validate) ?></div>
             <span class="stat-card-detail">Voir le détail →</span>
         </div>
     </a>
@@ -78,7 +78,7 @@ switch ($period) {
                 <span class="stat-value" id="dash-hours-month">—</span>
                 <span class="stat-trend stat-trend-neutral" id="dash-hours-trend">—</span>
             </div>
-            <div class="stat-label"><?= htmlspecialchars($label_hours) ?></div>
+            <div id="dash-hours-label" class="stat-label"><?= htmlspecialchars($label_hours) ?></div>
             <span class="stat-card-detail">Voir le détail →</span>
         </div>
     </a>
