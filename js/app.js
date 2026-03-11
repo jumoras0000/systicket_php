@@ -367,8 +367,8 @@
             if (countEl) countEl.textContent = tickets.length;
 
             var html = '';
-            tickets.forEach(function(t) {
-                html += '<tr class="ticket-row" data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '">';
+            tickets.forEach(function(t, index) {
+                html += '<tr class="ticket-row" data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '" data-row-index="' + index + '">';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">#' + t.id + '</a></td>';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">' + esc(t.title) + '</a></td>';
                 html += '<td>' + esc(t.project_name || '—') + '</td>';
@@ -563,6 +563,7 @@
                 setFieldValue('ticket-description', t.description);
                 setFieldValue('ticket-priority', t.priority);
                 setFieldValue('ticket-estimated-hours', t.estimated_hours);
+
                 // Status (edit mode only)
                 setFieldValue('ticket-status', t.status);
                 // Projet (les options sont déjà chargées grâce à Promise.all)
@@ -598,7 +599,7 @@
                 }
             });
 
-            // Map French form field names to English API names
+        
             data = mapFormData('ticket', data);
 
             var promise;
@@ -674,12 +675,12 @@
             // Compteurs
             var active = 0, paused = 0, completed = 0;
             var html = '';
-            projets.forEach(function(p) {
+            projets.forEach(function(p, index) {
                 if (p.status === 'active') active++;
                 else if (p.status === 'paused') paused++;
                 else if (p.status === 'completed') completed++;
 
-                html += '<tr class="project-row" data-status="' + esc(p.status) + '" data-client="' + (p.client_id || '') + '">';
+                html += '<tr class="project-row" data-status="' + esc(p.status) + '" data-client="' + (p.client_id || '') + '" data-row-index="' + index + '">';
                 html += '<td><a href="' + appUrl('projet-detail?id=' + p.id) + '">' + esc(p.name) + '</a></td>';
                 html += '<td>' + esc(p.client_name || '—') + '</td>';
                 html += '<td>' + projetStatusBadge(p.status) + '</td>';
@@ -913,12 +914,12 @@
 
             var totalH = 0, usedH = 0;
             var html = '';
-            contrats.forEach(function(c) {
+            contrats.forEach(function(c, index) {
                 totalH += parseFloat(c.hours || 0);
                 usedH += parseFloat(c.consumed_hours || 0);
                 var remaining = (parseFloat(c.hours) || 0) - (parseFloat(c.consumed_hours) || 0);
 
-                html += '<tr class="contrat-row">';
+                html += '<tr class="contrat-row" data-row-index="' + index + '">';
                 html += '<td>' + esc(c.reference || '—') + '</td>';
                 html += '<td><a href="' + appUrl('contrat-detail?id=' + c.id) + '">' + esc(c.project_name || '—') + '</a></td>';
                 html += '<td>' + esc(c.client_name || '—') + '</td>';
@@ -1085,13 +1086,13 @@
                 return;
             }
             var html = '';
-            users.forEach(function(u) {
+            users.forEach(function(u, index) {
                 var roleBadge = u.role === 'admin' ? '<span class="badge badge-info">Admin</span>'
                     : u.role === 'collaborateur' ? '<span class="badge badge-warning">Collaborateur</span>'
                     : '<span class="badge">Client</span>';
                 var sBadge = u.status === 'active' ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-info">Inactif</span>';
 
-                html += '<tr class="user-row" data-user-id="' + u.id + '" data-role="' + esc(u.role) + '" data-status="' + esc(u.status) + '">';
+                html += '<tr class="user-row" data-user-id="' + u.id + '" data-role="' + esc(u.role) + '" data-status="' + esc(u.status) + '" data-row-index="' + index + '">';
                 html += '<td>' + esc(u.first_name + ' ' + u.last_name) + '</td>';
                 html += '<td>' + esc(u.email) + '</td>';
                 html += '<td>' + esc(u.phone || '—') + '</td>';
@@ -1328,8 +1329,8 @@
                 return;
             }
             var html = '';
-            entries.forEach(function(e) {
-                html += '<tr class="time-row">';
+            entries.forEach(function(e, index) {
+                html += '<tr class="time-row" data-row-index="' + index + '">';
                 html += '<td>' + formatDate(e.date) + '</td>';
                 html += '<td>' + esc(e.user_name || '—') + '</td>';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">' + esc(e.ticket_title || ('#' + e.ticket_id)) + '</a></td>';
@@ -1365,8 +1366,9 @@
             var countEl = document.getElementById('validation-count');
             if (!container) return;
 
-            var pending = (tickets || []).filter(function(t) { return t.status === 'to-validate'; });
-            var validated = (tickets || []).filter(function(t) { return t.status === 'validated' || t.status === 'refused'; });
+            // Only consider billable tickets for validation amounts
+            var pending = (tickets || []).filter(function(t) { return t.status === 'to-validate' && t.type === 'billable'; });
+            var validated = (tickets || []).filter(function(t) { return (t.status === 'validated' || t.status === 'refused') && t.type === 'billable'; });
 
             if (countEl) countEl.textContent = pending.length;
 
@@ -1432,7 +1434,7 @@
         if (!container) return;
 
         apiGet('tickets.php?action=to-validate').then(function(tickets) {
-            var pending = (tickets || []).filter(function(t) { return t.status === 'to-validate'; });
+            var pending = (tickets || []).filter(function(t) { return t.status === 'to-validate' && t.type === 'billable'; });
             var countEl = document.getElementById('tickets-validation-count');
             if (countEl) countEl.textContent = pending.length;
 
