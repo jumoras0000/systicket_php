@@ -1,7 +1,4 @@
 <?php
-/**
- * Systicket 2.0 - Configuration de la base de données
- */
 
 // Configuration MySQL
 define('DB_HOST', 'localhost');
