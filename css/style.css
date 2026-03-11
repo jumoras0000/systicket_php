@@ -1257,24 +1257,8 @@ img {
     padding: 3px;
 }
 
-.btn-period {
-    padding: 6px 14px;
-    font-size: var(--font-size-xs);
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all var(--transition-fast);
-}
-
-.btn-period-active {
-    background: var(--color-primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-}
-
-.btn-period-active:hover {
-    background: var(--color-primary-dark);
-    color: white;
-}
+.btn-period { /* retiré : styles vidés pour compatibilité */ }
+.btn-period-active { /* retiré : styles vidés pour compatibilité */ }
 
 .dashboard-alerts {
     display: flex;

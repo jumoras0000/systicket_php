@@ -36,7 +36,7 @@
         <span class="list-results-count"><strong id="projets-count">0</strong> projet(s) affiché(s)</span>
     </div>
     <div class="list-toolbar-right">
-        <button type="button" class="btn btn-text btn-small" onclick="window.print();" aria-label="Exporter / imprimer">📥 Exporter</button>
+        <button type="button" class="btn btn-text btn-small section-export-btn" data-target="projets-table" aria-label="Exporter">📥 Exporter</button>
     </div>
 </section>
 

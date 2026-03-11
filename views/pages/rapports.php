@@ -9,9 +9,7 @@
         <p class="page-subtitle">Statistiques, analyses et export de données</p>
     </div>
     <div class="page-header-right page-header-actions">
-        <button type="button" class="btn btn-text" onclick="window.print();" aria-label="Imprimer le rapport">🖨️ Imprimer</button>
-        <button type="button" class="btn btn-secondary" onclick="window.print();" aria-label="Exporter en PDF">📥 Exporter PDF</button>
-        <button type="button" class="btn btn-primary" onclick="window.print();" aria-label="Exporter">📊 Exporter Excel</button>
+        <button type="button" class="btn btn-primary" id="export-btn" aria-label="Exporter">Exporter ▾</button>
     </div>
 </div>
 
@@ -35,9 +33,9 @@
         <div class="form-group">
             <label for="report-period" class="form-label">Période</label>
             <select id="report-period" class="form-select" aria-label="Période">
-                <option>Ce mois</option>
-                <option>Ce trimestre</option>
-                <option>Cette année</option>
+                <option>Mois</option>
+                <option>Trimestre</option>
+                <option>Année</option>
                 <option value="custom">Personnalisé</option>
             </select>
         </div>
@@ -79,6 +77,8 @@
         <strong>Période affichée :</strong> —
     </p>
 </section>
+
+<script src="<?= asset('js/rapports-export.js') ?>"></script>
 
 <!-- Résumé exécutif -->
 <section class="reports-executive card" aria-label="Résumé du rapport">
@@ -152,7 +152,7 @@
 <section id="report-hours-project" class="reports-section card" aria-labelledby="report-hours-project-title">
     <header class="reports-section-header">
         <h2 id="report-hours-project-title" class="section-title">Répartition des heures par projet</h2>
-        <button type="button" class="btn btn-text btn-small" onclick="window.print();">Exporter ce graphique</button>
+        <button type="button" class="btn btn-text btn-small section-export-btn" data-target="report-hours-project">Exporter ce graphique</button>
     </header>
     <div class="chart-container" id="chart-hours-project"></div>
     <p class="reports-chart-legend" id="chart-hours-project-total">Total : —</p>
@@ -163,7 +163,7 @@
     <article id="report-tickets-status" class="reports-section card" aria-labelledby="report-tickets-status-title">
         <header class="reports-section-header">
             <h2 id="report-tickets-status-title" class="section-title">Tickets par statut</h2>
-            <button type="button" class="btn btn-text btn-small" onclick="window.print();">Exporter</button>
+            <button type="button" class="btn btn-text btn-small section-export-btn" data-target="report-tickets-status">Exporter</button>
         </header>
         <div class="chart-container" id="chart-tickets-status"></div>
     </article>
@@ -171,7 +171,7 @@
     <article id="report-hours-user" class="reports-section card" aria-labelledby="report-hours-user-title">
         <header class="reports-section-header">
             <h2 id="report-hours-user-title" class="section-title">Heures par collaborateur</h2>
-            <button type="button" class="btn btn-text btn-small">Exporter</button>
+            <button type="button" class="btn btn-text btn-small section-export-btn" data-target="report-hours-user">Exporter</button>
         </header>
         <div class="dashboard-chart-bars" id="chart-hours-user"></div>
         <p class="reports-chart-legend" id="chart-hours-user-total">Total : —</p>
@@ -182,7 +182,7 @@
 <section id="report-billing" class="reports-section card" aria-labelledby="report-billing-title">
     <header class="reports-section-header">
         <h2 id="report-billing-title" class="section-title">Facturation par client</h2>
-        <button type="button" class="btn btn-text btn-small" onclick="window.print();">Exporter ce rapport</button>
+        <button type="button" class="btn btn-text btn-small section-export-btn" data-target="report-billing">Exporter ce rapport</button>
     </header>
     <div class="table-container">
         <table class="table">

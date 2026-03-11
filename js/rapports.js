@@ -85,13 +85,7 @@
             });
         }
 
-        document.querySelectorAll('.reports-section .btn-text.btn-small, .reports-section-header .btn-text').forEach(function(btn) {
-            if (!btn.onclick && btn.textContent.indexOf('Exporter') !== -1) {
-                btn.addEventListener('click', function() {
-                    window.print();
-                });
-            }
-        });
+        // Export buttons removed: no automatic print binding.
     }
 
     if (document.readyState === 'loading') {

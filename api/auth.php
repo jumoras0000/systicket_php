@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - API Authentification
+ *  - API Authentification
  * POST /api/auth/login    - Connexion
  * POST /api/auth/register - Inscription
  * POST /api/auth/logout   - Déconnexion

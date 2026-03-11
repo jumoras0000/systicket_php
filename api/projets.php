@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - API Projets
+ *  - API Projets
  */
 
 require_once __DIR__ . '/../includes/Auth.php';

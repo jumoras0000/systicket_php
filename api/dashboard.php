@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - API Dashboard
+ *  - API Dashboard
  */
 
 require_once __DIR__ . '/../includes/Auth.php';
@@ -24,8 +24,7 @@ $clientId = ($role === 'client') ? $userId : null;
 
 switch ($action) {
     case 'stats':
-        $period = $_GET['period'] ?? 'month';
-        jsonResponse(['success' => true, 'data' => $model->getStats($role, $userId, $clientId, $period)]);
+        jsonResponse(['success' => true, 'data' => $model->getStats($role, $userId, $clientId)]);
         break;
 
     case 'tickets-by-status':
@@ -37,8 +36,7 @@ switch ($action) {
     case 'hours-by-project':
         $filterUserId = ($role === 'collaborateur') ? $userId : null;
         $filterClientId = ($role === 'client') ? $clientId : null;
-        $period = $_GET['period'] ?? null;
-        jsonResponse(['success' => true, 'data' => $model->getHoursByProject($filterUserId, $filterClientId, $period)]);
+        jsonResponse(['success' => true, 'data' => $model->getHoursByProject($filterUserId, $filterClientId)]);
         break;
 
     case 'recent-tickets':

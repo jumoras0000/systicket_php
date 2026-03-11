@@ -64,6 +64,7 @@ $userRole = Auth::role();
     <script src="<?= asset('js/roles.js') ?>"></script>
     <script src="<?= asset('js/list-filters.js') ?>"></script>
     <script src="<?= asset('js/ticket-validation.js') ?>"></script>
+    <script src="<?= asset('js/rapports-export.js') ?>"></script>
     <script src="<?= asset('js/rapports.js') ?>"></script>
 </body>
 </html>

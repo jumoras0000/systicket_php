@@ -1,5 +1,5 @@
 -- ============================================================
--- Systicket 2.0 - Schema de base de donnees MySQL/MariaDB
+--  - Schema de base de donnees MySQL/MariaDB
 -- Le CLIENT est un UTILISATEUR avec role='client'
 -- Convention : noms de colonnes en anglais
 -- ============================================================

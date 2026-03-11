@@ -5,22 +5,6 @@
  */
 $user = Auth::user();
 $role = Auth::role();
-$period = $_GET['period'] ?? 'month';
-
-// Labels selon période
-switch ($period) {
-    case 'day':
-        $label_validate = "À valider aujourd'hui";
-        $label_hours = "Heures aujourd'hui";
-        break;
-    case 'week':
-        $label_validate = "À valider cette semaine";
-        $label_hours = "Heures cette semaine";
-        break;
-    default:
-        $label_validate = "À valider ce mois";
-        $label_hours = "Heures ce mois";
-}
 ?>
 <!-- En-tête -->
 <div class="page-header page-header-dashboard">
@@ -28,11 +12,7 @@ switch ($period) {
         <h1>Tableau de bord</h1>
     </div>
     <div class="page-header-right">
-        <div class="dashboard-period" role="group" aria-label="Période affichée">
-            <a href="<?= url('dashboard?period=day') ?>" class="btn btn-text btn-period <?= $period === 'day' ? 'btn-period-active' : '' ?>">Aujourd'hui</a>
-            <a href="<?= url('dashboard?period=week') ?>" class="btn btn-text btn-period <?= $period === 'week' ? 'btn-period-active' : '' ?>">Cette semaine</a>
-            <a href="<?= url('dashboard?period=month') ?>" class="btn btn-primary btn-period <?= $period === 'month' ? 'btn-period-active' : '' ?>">Ce mois</a>
-        </div>
+        <!-- Période: boutons retirés selon la demande -->
     </div>
 </div>
 
@@ -67,7 +47,7 @@ switch ($period) {
                 <span class="stat-value" id="dash-validation-count">—</span>
                 <span class="stat-trend stat-trend-up" id="dash-validation-trend">—</span>
             </div>
-            <div id="dash-validate-label" class="stat-label"><?= htmlspecialchars($label_validate) ?></div>
+            <div class="stat-label">À valider</div>
             <span class="stat-card-detail">Voir le détail →</span>
         </div>
     </a>
@@ -78,7 +58,7 @@ switch ($period) {
                 <span class="stat-value" id="dash-hours-month">—</span>
                 <span class="stat-trend stat-trend-neutral" id="dash-hours-trend">—</span>
             </div>
-            <div id="dash-hours-label" class="stat-label"><?= htmlspecialchars($label_hours) ?></div>
+            <div class="stat-label">Heures</div>
             <span class="stat-card-detail">Voir le détail →</span>
         </div>
     </a>
@@ -135,7 +115,7 @@ switch ($period) {
 
         <article class="widget-card role-admin-collaborateur">
             <header class="widget-header">
-                <h2>Heures par projet (ce mois)</h2>
+                <h2>Heures par projet</h2>
                 <a href="<?= url('rapports') ?>" class="link role-admin-only">Rapports</a>
             </header>
             <div class="widget-content" id="dash-hours-by-project">
@@ -175,7 +155,7 @@ switch ($period) {
 
         <article class="widget-card role-admin-collaborateur">
             <header class="widget-header">
-                <h2>Enveloppe heures (ce mois)</h2>
+                <h2>Enveloppe heures</h2>
             </header>
             <div class="widget-content" id="dash-hours-gauge">
                 <div class="dashboard-gauge">

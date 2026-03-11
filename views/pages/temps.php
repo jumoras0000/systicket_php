@@ -14,7 +14,7 @@
             <span class="time-period-label" id="week-label"><strong>—</strong></span>
             <button type="button" class="btn btn-text btn-small" id="week-next">Semaine suiv. →</button>
         </div>
-        <button type="button" class="btn btn-secondary btn-small" onclick="window.print();" aria-label="Exporter / imprimer">📥 Exporter</button>
+        <button type="button" class="btn btn-secondary btn-small section-export-btn" data-target="temps-table" aria-label="Exporter">📥 Exporter</button>
     </div>
 </div>
 
@@ -22,11 +22,11 @@
 <section class="list-summary-cards" aria-label="Résumé des heures">
     <article class="list-summary-card list-summary-card-primary">
         <span class="list-summary-value" id="temps-month">—</span>
-        <span class="list-summary-label">Ce mois</span>
+        <span class="list-summary-label">Mois</span>
     </article>
     <article class="list-summary-card list-summary-card-success">
         <span class="list-summary-value" id="temps-week">—</span>
-        <span class="list-summary-label">Cette semaine</span>
+        <span class="list-summary-label">Semaine</span>
     </article>
     <article class="list-summary-card list-summary-card-muted">
         <span class="list-summary-value" id="temps-remaining">—</span>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - API Tickets
+ *  - API Tickets
  * GET    /api/tickets.php           - Liste
  * GET    /api/tickets.php?id=X      - Détail
  * POST   /api/tickets.php           - Créer

@@ -1,6 +1,6 @@
 <?php
 /**
- * Systicket 2.0 - API Temps
+ *  - API Temps
  */
 
 require_once __DIR__ . '/../includes/Auth.php';

@@ -187,46 +187,13 @@
   
     function initDashboard() {
         if (document.body.getAttribute('data-page') !== 'dashboard') return;
-        // Read initial period from active button
-        var activeBtn = document.querySelector('.btn-period-active');
-        var initialPeriod = (activeBtn && activeBtn.getAttribute('data-period')) || 'month';
-        loadDashboardStats(initialPeriod);
 
-        // Bind period buttons to switch without reload
-        var periodButtons = document.querySelectorAll('.btn-period');
-        periodButtons.forEach(function(b) {
-            b.addEventListener('click', function(e) {
-                e.preventDefault();
-                var p = b.getAttribute('data-period') || 'month';
-                // Toggle active classes
-                periodButtons.forEach(function(x) { x.classList.remove('btn-period-active'); });
-                b.classList.add('btn-period-active');
-                loadDashboardStats(p);
-            });
-        });
-
-
-    function loadDashboardStats(period) {
-        apiGet('dashboard.php?action=stats&period=' + encodeURIComponent(period)).then(function(data) {
+        apiGet('dashboard.php?action=stats').then(function(data) {
             if (!data) return;
             setTextById('dash-tickets-open', data.tickets_open || 0);
             setTextById('dash-projets-active', data.projets_active || 0);
             setTextById('dash-validation-count', data.to_validate || 0);
             setTextById('dash-hours-month', formatHours(data.hours_month || 0));
-
-            // Update labels for periods
-            var validateLabelEl = document.getElementById('dash-validate-label');
-            var hoursLabelEl = document.getElementById('dash-hours-label');
-            if (validateLabelEl) {
-                if (period === 'day') validateLabelEl.textContent = "À valider aujourd'hui";
-                else if (period === 'week') validateLabelEl.textContent = "À valider cette semaine";
-                else validateLabelEl.textContent = "À valider ce mois";
-            }
-            if (hoursLabelEl) {
-                if (period === 'day') hoursLabelEl.textContent = "Heures aujourd'hui";
-                else if (period === 'week') hoursLabelEl.textContent = "Heures cette semaine";
-                else hoursLabelEl.textContent = "Heures ce mois";
-            }
 
             // Populate hours gauge
             var gaugeEl = document.getElementById('dash-hours-gauge');
@@ -242,33 +209,8 @@
                 var progressText = gaugeEl.querySelector('.progress-text');
                 if (progressText) progressText.textContent = pct + '% consommé — ' + formatHours(remaining) + ' restantes';
             }
-
-            // Refresh hours-by-project chart for the selected period
-            apiGet('dashboard.php?action=hours-by-project&period=' + encodeURIComponent(period)).then(function(hdata) {
-                var container = document.getElementById('dash-hours-by-project');
-                if (!container) return;
-                if (!hdata || !hdata.length) { container.innerHTML = '<p class="text-secondary">Aucune donnée pour cette période.</p>'; return; }
-                var max = Math.max.apply(null, hdata.map(function(d) { return parseFloat(d.total || 0); }));
-                var total = hdata.reduce(function(s, d) { return s + parseFloat(d.total || 0); }, 0);
-                var colors = ['dashboard-chart-bar-primary', 'dashboard-chart-bar-blue', 'dashboard-chart-bar-green'];
-                var html = '<div class="dashboard-chart-bars">';
-                hdata.forEach(function(item, i) {
-                    var pct = max > 0 ? Math.round((parseFloat(item.total || 0) / max) * 100) : 0;
-                    html += '<div class="dashboard-chart-row">';
-                    html += '<span class="dashboard-chart-label">' + esc(item.name) + '</span>';
-                    html += '<div class="dashboard-chart-bar-wrap">';
-                    html += '<div class="dashboard-chart-bar ' + (colors[i % colors.length]) + '" style="width: ' + pct + '%;"></div>';
-                    html += '</div>';
-                    html += '<span class="dashboard-chart-value">' + formatHours(item.total) + '</span>';
-                    html += '</div>';
-                });
-                html += '</div>';
-                html += '<p class="dashboard-chart-total"><strong>Total : ' + formatHours(total) + '</strong></p>';
-                container.innerHTML = html;
-            }).catch(function() {});
-
         }).catch(function() {});
-    }
+
         apiGet('dashboard.php?action=tickets-by-status').then(function(data) {
             var container = document.getElementById('dash-tickets-by-status');
             if (!container || !data || !data.length) return;
@@ -315,8 +257,8 @@
             var tbody = document.getElementById('dash-recent-tickets');
             if (!tbody || !data || !data.length) return;
             var html = '';
-            data.forEach(function(t) {
-                html += '<tr>';
+            data.forEach(function(t, i) {
+                html += '<tr data-status="' + esc(t.status) + '" data-project_id="' + (t.project_id || '') + '" data-row-index="' + i + '">';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">#' + t.id + '</a></td>';
                 html += '<td>' + esc(t.title) + '</td>';
                 html += '<td>' + statusBadge(t.status) + '</td>';
@@ -324,6 +266,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
         }).catch(function() {});
 
         apiGet('dashboard.php?action=recent-activity').then(function(data) {
@@ -426,7 +369,7 @@
 
             var html = '';
             tickets.forEach(function(t, index) {
-                html += '<tr class="ticket-row" data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '" data-row-index="' + index + '">';
+                html += '<tr class="ticket-row" data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '" data-project_id="' + (t.project_id || '') + '" data-row-index="' + index + '">';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">#' + t.id + '</a></td>';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">' + esc(t.title) + '</a></td>';
                 html += '<td>' + esc(t.project_name || '—') + '</td>';
@@ -444,6 +387,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
         }).catch(function(err) {
             var tbody = document.getElementById('tickets-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="table-empty">Erreur de chargement.</td></tr>';
@@ -760,6 +704,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
 
             setTextById('projets-active', active);
             setTextById('projets-paused', paused);
@@ -806,8 +751,8 @@
                 var tbody = document.getElementById('projet-tickets-tbody');
                 if (tbody) {
                     var thtml = '';
-                    p.tickets.forEach(function(t) {
-                        thtml += '<tr>';
+                    p.tickets.forEach(function(t, idx) {
+                        thtml += '<tr data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '" data-project_id="' + (t.project_id || id) + '" data-row-index="' + idx + '">';
                         thtml += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">#' + t.id + '</a></td>';
                         thtml += '<td>' + esc(t.title) + '</td>';
                         thtml += '<td>' + statusBadge(t.status) + '</td>';
@@ -819,6 +764,7 @@
                         thtml += '</tr>';
                     });
                     tbody.innerHTML = thtml;
+                    document.dispatchEvent(new Event('systicket:contentLoaded'));
                 }
             } else {
                 var tbody2 = document.getElementById('projet-tickets-tbody');
@@ -994,6 +940,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
 
             setTextById('contrats-total-hours', formatHours(totalH));
             setTextById('contrats-used-hours', formatHours(usedH));
@@ -1054,6 +1001,7 @@
                         html += '</tr>';
                     });
                     tbody.innerHTML = html;
+                    document.dispatchEvent(new Event('systicket:contentLoaded'));
                 }
             }
         }).catch(function() {});
@@ -1163,6 +1111,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
         }).catch(function(err) {
             var tbody = document.getElementById('users-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
@@ -1388,7 +1337,7 @@
             }
             var html = '';
             entries.forEach(function(e, index) {
-                html += '<tr class="time-row" data-row-index="' + index + '">';
+                html += '<tr class="time-row" data-project="' + (e.project_id || '') + '" data-row-index="' + index + '">';
                 html += '<td>' + formatDate(e.date) + '</td>';
                 html += '<td>' + esc(e.user_name || '—') + '</td>';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">' + esc(e.ticket_title || ('#' + e.ticket_id)) + '</a></td>';
@@ -1401,6 +1350,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
+            document.dispatchEvent(new Event('systicket:contentLoaded'));
         }).catch(function() {
             var tbody = document.getElementById('temps-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
@@ -1864,7 +1814,7 @@
             if (periodInfo) {
                 var fromVal = dateFrom ? dateFrom.value : '';
                 var toVal = dateTo ? dateTo.value : '';
-                periodInfo.innerHTML = '<strong>Période affichée :</strong> ' + (fromVal ? formatDate(fromVal) : 'Début') + ' — ' + (toVal ? formatDate(toVal) : 'Aujourd\'hui');
+                periodInfo.innerHTML = '<strong>Période affichée :</strong> ' + (fromVal ? formatDate(fromVal) : 'Début') + ' — ' + (toVal ? formatDate(toVal) : '—');
             }
         }).catch(function(err) {
             var execEl = document.getElementById('report-executive');

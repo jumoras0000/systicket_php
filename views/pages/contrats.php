@@ -35,7 +35,7 @@
         <span class="list-results-count"><strong id="contrats-count">0</strong> contrat(s)</span>
     </div>
     <div class="list-toolbar-right">
-        <button type="button" class="btn btn-text btn-small" onclick="window.print();" aria-label="Exporter / imprimer">📥 Exporter</button>
+        <button type="button" class="btn btn-text btn-small section-export-btn" data-target="contrats-table" aria-label="Exporter">📥 Exporter</button>
     </div>
 </section>
 

@@ -9,7 +9,6 @@
         <p class="page-subtitle">Rôles, permissions et accès à l'application</p>
     </div>
     <div class="page-header-right">
-        <a href="<?= url('utilisateurs#inviter') ?>" class="btn btn-secondary">📧 Inviter</a>
         <a href="<?= url('user-form') ?>" class="btn btn-primary">+ Ajouter un utilisateur</a>
     </div>
 </div>
