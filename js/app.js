@@ -6,6 +6,53 @@
     var API = CFG.apiUrl || '/systicket_php/api';
     var BASE = CFG.baseUrl || '/systicket_php';
     var CSRF = CFG.csrfToken || '';
+    var _boundElements = new WeakSet();
+
+    // Pagination state per page
+    var _pagination = {};
+    var ITEMS_PER_PAGE = 15;
+
+    function paginateData(allItems, pageKey) {
+        if (!_pagination[pageKey]) _pagination[pageKey] = { page: 1 };
+        var state = _pagination[pageKey];
+        var total = allItems.length;
+        var totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+        if (state.page > totalPages) state.page = totalPages;
+        if (state.page < 1) state.page = 1;
+        var start = (state.page - 1) * ITEMS_PER_PAGE;
+        return {
+            items: allItems.slice(start, start + ITEMS_PER_PAGE),
+            page: state.page,
+            totalPages: totalPages,
+            total: total
+        };
+    }
+
+    function updatePaginationUI(paginationId, pageKey, reloadFn) {
+        var container = document.getElementById(paginationId);
+        if (!container) return;
+        var state = _pagination[pageKey] || { page: 1 };
+        var info = container.querySelector('.pagination-info');
+        var prevBtn = container.querySelector('.pagination-prev');
+        var nextBtn = container.querySelector('.pagination-next');
+        // totalPages is set during the last paginateData call
+        // We need to read it from a data attribute
+        var totalPages = parseInt(container.getAttribute('data-total-pages') || '1');
+        if (info) info.textContent = 'Page ' + state.page + ' sur ' + totalPages;
+        if (prevBtn) {
+            prevBtn.disabled = state.page <= 1;
+            prevBtn.onclick = function() {
+                if (state.page > 1) { state.page--; reloadFn(); }
+            };
+        }
+        if (nextBtn) {
+            nextBtn.disabled = state.page >= totalPages;
+            nextBtn.onclick = function() {
+                if (state.page < totalPages) { state.page++; reloadFn(); }
+            };
+        }
+    }
+
 
  
     function apiUrl(endpoint) {
@@ -98,6 +145,35 @@
     function formatHours(h) {
         if (h === null || h === undefined) return '—';
         return parseFloat(h).toFixed(1) + 'h';
+    }
+
+    // Apply role-based visibility to dynamically loaded content
+    function applyDynamicRoles() {
+        var role = (CFG.user && CFG.user.role) || CFG.role || 'client';
+        document.querySelectorAll('.role-admin-only').forEach(function(el) {
+            el.style.display = (role !== 'admin') ? 'none' : '';
+        });
+        document.querySelectorAll('.role-admin-collaborateur').forEach(function(el) {
+            el.style.display = (role !== 'admin' && role !== 'collaborateur') ? 'none' : '';
+        });
+        document.querySelectorAll('.role-client-only').forEach(function(el) {
+            el.style.display = (role !== 'client') ? 'none' : '';
+        });
+    }
+
+    // Bind an event listener only once per element
+    function bindOnce(el, event, handler) {
+        if (!el || _boundElements.has(el)) return;
+        _boundElements.add(el);
+        el.addEventListener(event, handler);
+    }
+
+    // Clear dynamic options from a select, keeping the first (placeholder) option
+    function clearSelectOptions(sel) {
+        if (!sel) return;
+        while (sel.options.length > 1) {
+            sel.remove(1);
+        }
     }
 
    
@@ -266,7 +342,7 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
+            applyDynamicRoles();
         }).catch(function() {});
 
         apiGet('dashboard.php?action=recent-activity').then(function(data) {
@@ -312,8 +388,9 @@
         if (document.getElementById('ticket-form')) return;
 
         // Charger les projets dans le filtre
+        var sel = document.getElementById('filter-project');
+        clearSelectOptions(sel);
         apiGet('projets.php').then(function(data) {
-            var sel = document.getElementById('filter-project');
             if (sel && data && data.length) {
                 data.forEach(function(p) {
                     var opt = document.createElement('option');
@@ -331,12 +408,18 @@
             loadClientValidationCards();
         }
 
-        // Filtres
+        // Reset page on filter change
+        function loadTicketsResetPage() {
+            _pagination['tickets'] = { page: 1 };
+            loadTickets();
+        }
+
+        // Filtres - bindOnce prevents duplicate listeners
         var search = document.getElementById('ticket-search');
-        if (search) search.addEventListener('input', debounce(loadTickets, 300));
+        bindOnce(search, 'input', debounce(loadTicketsResetPage, 300));
         ['filter-status', 'filter-priority', 'filter-type', 'filter-project'].forEach(function(id) {
             var el = document.getElementById(id);
-            if (el) el.addEventListener('change', loadTickets);
+            bindOnce(el, 'change', loadTicketsResetPage);
         });
     }
 
@@ -363,12 +446,17 @@
             if (!tickets || !tickets.length) {
                 tbody.innerHTML = '<tr class="table-empty table-empty-row"><td colspan="11">Aucun ticket pour le moment.</td></tr>';
                 if (countEl) countEl.textContent = '0';
+                var pg = document.getElementById('tickets-pagination');
+                if (pg) { pg.setAttribute('data-total-pages', '1'); }
+                updatePaginationUI('tickets-pagination', 'tickets', loadTickets);
                 return;
             }
-            if (countEl) countEl.textContent = tickets.length;
+
+            var paged = paginateData(tickets, 'tickets');
+            if (countEl) countEl.textContent = paged.total;
 
             var html = '';
-            tickets.forEach(function(t, index) {
+            paged.items.forEach(function(t, index) {
                 html += '<tr class="ticket-row" data-status="' + esc(t.status) + '" data-priority="' + esc(t.priority) + '" data-type="' + esc(t.type) + '" data-project_id="' + (t.project_id || '') + '" data-row-index="' + index + '">';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">#' + t.id + '</a></td>';
                 html += '<td><a href="' + appUrl('ticket-detail?id=' + t.id) + '">' + esc(t.title) + '</a></td>';
@@ -387,7 +475,11 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
+            applyDynamicRoles();
+
+            var pg = document.getElementById('tickets-pagination');
+            if (pg) pg.setAttribute('data-total-pages', paged.totalPages);
+            updatePaginationUI('tickets-pagination', 'tickets', loadTickets);
         }).catch(function(err) {
             var tbody = document.getElementById('tickets-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="table-empty">Erreur de chargement.</td></tr>';
@@ -527,29 +619,30 @@
         var duplicateId = parseInt(form.getAttribute('data-duplicate') || 0);
 
         // Charger projets et collaborateurs
+        var projSel = document.getElementById('ticket-project');
+        clearSelectOptions(projSel);
         var projetsLoaded = apiGet('projets.php').then(function(data) {
-            var sel = document.getElementById('ticket-project');
-            if (sel && data) {
+            if (projSel && data) {
                 var projets = Array.isArray(data) ? data : [];
                 projets.forEach(function(p) {
                     var opt = document.createElement('option');
                     opt.value = p.id;
                     opt.textContent = p.name;
-                    sel.appendChild(opt);
+                    projSel.appendChild(opt);
                 });
             }
         });
 
+        var assignSel = document.getElementById('ticket-assignees');
         var collabsLoaded = apiGet('users.php?action=collaborateurs').then(function(data) {
-            var sel = document.getElementById('ticket-assignees');
-            if (sel && data) {
-                sel.innerHTML = '';
+            if (assignSel && data) {
+                assignSel.innerHTML = '';
                 var users = Array.isArray(data) ? data : [];
                 users.forEach(function(u) {
                     var opt = document.createElement('option');
                     opt.value = u.id;
                     opt.textContent = u.first_name + ' ' + u.last_name;
-                    sel.appendChild(opt);
+                    assignSel.appendChild(opt);
                 });
             }
         });
@@ -627,8 +720,9 @@
         if (document.getElementById('project-form')) return;
 
         // Charger clients dans filtre
+        var sel = document.getElementById('filter-client');
+        clearSelectOptions(sel);
         apiGet('users.php?action=clients').then(function(data) {
-            var sel = document.getElementById('filter-client');
             if (sel && data) {
                 var clients = Array.isArray(data) ? data : [];
                 clients.forEach(function(c) {
@@ -642,12 +736,18 @@
 
         loadProjets();
 
-        // Filtres
+        // Reset page on filter change
+        function loadProjetsResetPage() {
+            _pagination['projets'] = { page: 1 };
+            loadProjets();
+        }
+
+        // Filtres - bindOnce prevents duplicate listeners
         var search = document.getElementById('projet-search');
-        if (search) search.addEventListener('input', debounce(loadProjets, 300));
+        bindOnce(search, 'input', debounce(loadProjetsResetPage, 300));
         ['filter-status', 'filter-client'].forEach(function(id) {
             var el = document.getElementById(id);
-            if (el) el.addEventListener('change', loadProjets);
+            bindOnce(el, 'change', loadProjetsResetPage);
         });
     }
 
@@ -670,18 +770,28 @@
             if (!projets || !projets.length) {
                 tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucun projet pour le moment.</td></tr>';
                 if (countEl) countEl.textContent = '0';
+                setTextById('projets-active', 0);
+                setTextById('projets-paused', 0);
+                setTextById('projets-completed', 0);
+                var pg = document.getElementById('projets-pagination');
+                if (pg) pg.setAttribute('data-total-pages', '1');
+                updatePaginationUI('projets-pagination', 'projets', loadProjets);
                 return;
             }
-            if (countEl) countEl.textContent = projets.length;
 
-            // Compteurs
+            // Compteurs on full dataset
             var active = 0, paused = 0, completed = 0;
-            var html = '';
-            projets.forEach(function(p, index) {
+            projets.forEach(function(p) {
                 if (p.status === 'active') active++;
                 else if (p.status === 'paused') paused++;
                 else if (p.status === 'completed') completed++;
+            });
 
+            var paged = paginateData(projets, 'projets');
+            if (countEl) countEl.textContent = paged.total;
+
+            var html = '';
+            paged.items.forEach(function(p, index) {
                 html += '<tr class="project-row" data-status="' + esc(p.status) + '" data-client="' + (p.client_id || '') + '" data-row-index="' + index + '">';
                 html += '<td><a href="' + appUrl('projet-detail?id=' + p.id) + '">' + esc(p.name) + '</a></td>';
                 html += '<td>' + esc(p.client_name || '—') + '</td>';
@@ -704,11 +814,15 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
+            applyDynamicRoles();
 
             setTextById('projets-active', active);
             setTextById('projets-paused', paused);
             setTextById('projets-completed', completed);
+
+            var pg = document.getElementById('projets-pagination');
+            if (pg) pg.setAttribute('data-total-pages', paged.totalPages);
+            updatePaginationUI('projets-pagination', 'projets', loadProjets);
         }).catch(function() {
             var tbody = document.getElementById('projets-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
@@ -764,7 +878,7 @@
                         thtml += '</tr>';
                     });
                     tbody.innerHTML = thtml;
-                    document.dispatchEvent(new Event('systicket:contentLoaded'));
+                    applyDynamicRoles();
                 }
             } else {
                 var tbody2 = document.getElementById('projet-tickets-tbody');
@@ -809,30 +923,33 @@
 
         var entityId = parseInt(form.getAttribute('data-id') || 0);
 
+        var clientSelPF = document.getElementById('project-client');
+        clearSelectOptions(clientSelPF);
         var clientsLoaded = apiGet('users.php?action=clients').then(function(data) {
-            var sel = document.getElementById('project-client');
-            if (sel && data) {
+            if (clientSelPF && data) {
                 var clients = Array.isArray(data) ? data : [];
                 clients.forEach(function(c) {
                     var opt = document.createElement('option');
                     opt.value = c.id;
                     opt.textContent = c.first_name + ' ' + c.last_name;
-                    sel.appendChild(opt);
+                    clientSelPF.appendChild(opt);
                 });
             }
         });
 
+        var assignSelPF = document.getElementById('project-assignees');
+        var mgrSelPF = document.getElementById('project-manager');
+        if (assignSelPF) assignSelPF.innerHTML = '';
+        clearSelectOptions(mgrSelPF);
         var collabsLoaded = apiGet('users.php?action=collaborateurs').then(function(data) {
-            var sel = document.getElementById('project-assignees');
-            var mgrSel = document.getElementById('project-manager');
             if (data) {
                 var users = Array.isArray(data) ? data : [];
                 users.forEach(function(u) {
                     var opt = document.createElement('option');
                     opt.value = u.id;
                     opt.textContent = u.first_name + ' ' + u.last_name;
-                    if (sel) sel.appendChild(opt);
-                    if (mgrSel) mgrSel.appendChild(opt.cloneNode(true));
+                    if (assignSelPF) assignSelPF.appendChild(opt);
+                    if (mgrSelPF) mgrSelPF.appendChild(opt.cloneNode(true));
                 });
             }
         });
@@ -899,16 +1016,58 @@
         if (document.body.getAttribute('data-page') !== 'contrats') return;
         if (document.getElementById('contrat-form')) return;
 
-        apiGet('contrats.php').then(function(contrats) {
+        loadContrats();
+
+        // Reset page on filter change
+        function loadContratsResetPage() {
+            _pagination['contrats'] = { page: 1 };
+            loadContrats();
+        }
+
+        // Filtres - bindOnce prevents duplicate listeners
+        var search = document.getElementById('contrat-search');
+        bindOnce(search, 'input', debounce(loadContratsResetPage, 300));
+        ['filter-status'].forEach(function(id) {
+            var el = document.getElementById(id);
+            bindOnce(el, 'change', loadContratsResetPage);
+        });
+    }
+
+    function loadContrats() {
+        var params = [];
+        var search = document.getElementById('contrat-search');
+        if (search && search.value) params.push('search=' + encodeURIComponent(search.value));
+        var status = document.getElementById('filter-status');
+        if (status && status.value) params.push('status=' + encodeURIComponent(status.value));
+
+        var url = 'contrats.php' + (params.length ? '?' + params.join('&') : '');
+
+        apiGet(url).then(function(contrats) {
             var tbody = document.getElementById('contrats-tbody');
             var countEl = document.getElementById('contrats-count');
             if (!tbody) return;
 
             if (!contrats || !contrats.length) {
                 tbody.innerHTML = '<tr class="table-empty-row"><td colspan="10" class="table-empty">Aucun contrat pour le moment.</td></tr>';
+                if (countEl) countEl.textContent = '0';
+                setTextById('contrats-total-hours', formatHours(0));
+                setTextById('contrats-used-hours', formatHours(0));
+                setTextById('contrats-remaining-hours', formatHours(0));
+                var pg = document.getElementById('contrats-pagination');
+                if (pg) pg.setAttribute('data-total-pages', '1');
+                updatePaginationUI('contrats-pagination', 'contrats', loadContrats);
                 return;
             }
-            if (countEl) countEl.textContent = contrats.length;
+
+            // Summary on full dataset
+            var totalH = 0, usedH = 0;
+            contrats.forEach(function(c) {
+                totalH += parseFloat(c.hours || 0);
+                usedH += parseFloat(c.consumed_hours || 0);
+            });
+
+            var paged = paginateData(contrats, 'contrats');
+            if (countEl) countEl.textContent = paged.total;
 
             var contratStatusMap = {
                 'active': '<span class="badge badge-success">Actif</span>',
@@ -916,14 +1075,11 @@
                 'cancelled': '<span class="badge badge-danger">Annulé</span>'
             };
 
-            var totalH = 0, usedH = 0;
             var html = '';
-            contrats.forEach(function(c, index) {
-                totalH += parseFloat(c.hours || 0);
-                usedH += parseFloat(c.consumed_hours || 0);
+            paged.items.forEach(function(c, index) {
                 var remaining = (parseFloat(c.hours) || 0) - (parseFloat(c.consumed_hours) || 0);
 
-                html += '<tr class="contrat-row" data-row-index="' + index + '">';
+                html += '<tr class="contrat-row" data-status="' + esc(c.status) + '" data-client="' + (c.client_id || '') + '" data-row-index="' + index + '">';
                 html += '<td>' + esc(c.reference || '—') + '</td>';
                 html += '<td><a href="' + appUrl('contrat-detail?id=' + c.id) + '">' + esc(c.project_name || '—') + '</a></td>';
                 html += '<td>' + esc(c.client_name || '—') + '</td>';
@@ -940,11 +1096,15 @@
                 html += '</tr>';
             });
             tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
+            applyDynamicRoles();
 
             setTextById('contrats-total-hours', formatHours(totalH));
             setTextById('contrats-used-hours', formatHours(usedH));
             setTextById('contrats-remaining-hours', formatHours(Math.max(0, totalH - usedH)));
+
+            var pg = document.getElementById('contrats-pagination');
+            if (pg) pg.setAttribute('data-total-pages', paged.totalPages);
+            updatePaginationUI('contrats-pagination', 'contrats', loadContrats);
         }).catch(function(err) {
             var tbody = document.getElementById('contrats-tbody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="table-empty">Erreur de chargement.</td></tr>';
@@ -1001,7 +1161,7 @@
                         html += '</tr>';
                     });
                     tbody.innerHTML = html;
-                    document.dispatchEvent(new Event('systicket:contentLoaded'));
+                    applyDynamicRoles();
                 }
             }
         }).catch(function() {});
@@ -1013,28 +1173,30 @@
 
         var entityId = parseInt(form.getAttribute('data-id') || 0);
 
+        var contratProjectSel = document.getElementById('contrat-project');
+        clearSelectOptions(contratProjectSel);
         var projetsLoaded = apiGet('projets.php').then(function(data) {
-            var sel = document.getElementById('contrat-project');
-            if (sel && data) {
+            if (contratProjectSel && data) {
                 var projets = Array.isArray(data) ? data : [];
                 projets.forEach(function(p) {
                     var opt = document.createElement('option');
                     opt.value = p.id;
                     opt.textContent = p.name;
-                    sel.appendChild(opt);
+                    contratProjectSel.appendChild(opt);
                 });
             }
         });
 
+        var contratClientSel = document.getElementById('contrat-client');
+        clearSelectOptions(contratClientSel);
         var clientsLoaded = apiGet('users.php?action=clients').then(function(data) {
-            var sel = document.getElementById('contrat-client');
-            if (sel && data) {
+            if (contratClientSel && data) {
                 var clients = Array.isArray(data) ? data : [];
                 clients.forEach(function(c) {
                     var opt = document.createElement('option');
                     opt.value = c.id;
                     opt.textContent = c.first_name + ' ' + c.last_name;
-                    sel.appendChild(opt);
+                    contratClientSel.appendChild(opt);
                 });
             }
         });
@@ -1084,37 +1246,20 @@
         if (document.body.getAttribute('data-page') !== 'utilisateurs') return;
         if (document.getElementById('user-form')) return;
 
-        apiGet('users.php').then(function(users) {
-            var tbody = document.getElementById('users-tbody');
-            if (!tbody) return;
-            if (!users || !users.length) {
-                tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucun utilisateur.</td></tr>';
-                return;
-            }
-            var html = '';
-            users.forEach(function(u, index) {
-                var roleBadge = u.role === 'admin' ? '<span class="badge badge-info">Admin</span>'
-                    : u.role === 'collaborateur' ? '<span class="badge badge-warning">Collaborateur</span>'
-                    : '<span class="badge">Client</span>';
-                var sBadge = u.status === 'active' ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-info">Inactif</span>';
+        loadUsers();
 
-                html += '<tr class="user-row" data-user-id="' + u.id + '" data-role="' + esc(u.role) + '" data-status="' + esc(u.status) + '" data-row-index="' + index + '">';
-                html += '<td>' + esc(u.first_name + ' ' + u.last_name) + '</td>';
-                html += '<td>' + esc(u.email) + '</td>';
-                html += '<td>' + esc(u.phone || '—') + '</td>';
-                html += '<td>' + roleBadge + '</td>';
-                html += '<td>' + sBadge + '</td>';
-                html += '<td>' + formatDate(u.last_login || u.last_activity) + '</td>';
-                html += '<td>';
-                html += '<a href="' + appUrl('user-form?id=' + u.id) + '" class="btn btn-text btn-small">Voir</a>';
-                html += '</td>';
-                html += '</tr>';
-            });
-            tbody.innerHTML = html;
-            document.dispatchEvent(new Event('systicket:contentLoaded'));
-        }).catch(function(err) {
-            var tbody = document.getElementById('users-tbody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
+        // Reset page on filter change
+        function loadUsersResetPage() {
+            _pagination['users'] = { page: 1 };
+            loadUsers();
+        }
+
+        // Filtres - bindOnce prevents duplicate listeners
+        var search = document.getElementById('user-search');
+        bindOnce(search, 'input', debounce(loadUsersResetPage, 300));
+        ['filter-role', 'filter-status'].forEach(function(id) {
+            var el = document.getElementById(id);
+            bindOnce(el, 'change', loadUsersResetPage);
         });
 
         // Profils en attente
@@ -1140,6 +1285,65 @@
             });
             list.innerHTML = html;
         }).catch(function() {});
+    }
+
+    function loadUsers() {
+        var params = [];
+        var search = document.getElementById('user-search');
+        if (search && search.value) params.push('search=' + encodeURIComponent(search.value));
+        var role = document.getElementById('filter-role');
+        if (role && role.value) params.push('role=' + encodeURIComponent(role.value));
+        var status = document.getElementById('filter-status');
+        if (status && status.value) params.push('status=' + encodeURIComponent(status.value));
+
+        var url = 'users.php' + (params.length ? '?' + params.join('&') : '');
+
+        apiGet(url).then(function(users) {
+            var tbody = document.getElementById('users-tbody');
+            var countEl = document.getElementById('users-count');
+            if (!tbody) return;
+
+            if (!users || !users.length) {
+                tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucun utilisateur trouvé.</td></tr>';
+                if (countEl) countEl.textContent = '0';
+                var pg = document.getElementById('users-pagination');
+                if (pg) pg.setAttribute('data-total-pages', '1');
+                updatePaginationUI('users-pagination', 'users', loadUsers);
+                return;
+            }
+
+            var paged = paginateData(users, 'users');
+            if (countEl) countEl.textContent = paged.total;
+
+            var html = '';
+            paged.items.forEach(function(u, index) {
+                var roleBadge = u.role === 'admin' ? '<span class="badge badge-info">Admin</span>'
+                    : u.role === 'collaborateur' ? '<span class="badge badge-warning">Collaborateur</span>'
+                    : '<span class="badge">Client</span>';
+                var sBadge = u.status === 'active' ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-info">Inactif</span>';
+
+                html += '<tr class="user-row" data-user-id="' + u.id + '" data-role="' + esc(u.role) + '" data-status="' + esc(u.status) + '" data-row-index="' + index + '">';
+                html += '<td>' + esc(u.first_name + ' ' + u.last_name) + '</td>';
+                html += '<td>' + esc(u.email) + '</td>';
+                html += '<td>' + esc(u.phone || '—') + '</td>';
+                html += '<td>' + roleBadge + '</td>';
+                html += '<td>' + sBadge + '</td>';
+                html += '<td>' + formatDate(u.last_login || u.last_activity) + '</td>';
+                html += '<td>';
+                html += '<a href="' + appUrl('user-form?id=' + u.id) + '" class="btn btn-text btn-small">Voir</a>';
+                html += '</td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+            applyDynamicRoles();
+
+            var pg = document.getElementById('users-pagination');
+            if (pg) pg.setAttribute('data-total-pages', paged.totalPages);
+            updatePaginationUI('users-pagination', 'users', loadUsers);
+        }).catch(function(err) {
+            var tbody = document.getElementById('users-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
+        });
     }
 
     // Profil approval/rejection globals
@@ -1204,52 +1408,52 @@
 
       // PAGE: TEMPS
   
-function initTemps() {
-    if (document.body.getAttribute('data-page') !== 'temps') return;
+    function initTemps() {
+        if (document.body.getAttribute('data-page') !== 'temps') return;
 
-    // Charger tickets pour le formulaire
-    apiGet('tickets.php').then(function(tickets) {
-        var sel = document.getElementById('time-ticket');
-        if (!sel) return;
-        if (tickets && tickets.length) {
-            tickets.forEach(function(t) {
-                var opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = '#' + t.id + ' - ' + (t.title || '');
-                sel.appendChild(opt);
-            });
-        }
-    });
+        // Charger tickets
+        var ticketSel = document.getElementById('time-ticket');
+        clearSelectOptions(ticketSel);
+        apiGet('tickets.php').then(function(tickets) {
+            if (!ticketSel) return;
+            if (tickets && tickets.length) {
+                tickets.forEach(function(t) {
+                    var opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = '#' + t.id + ' - ' + (t.title || '');
+                    ticketSel.appendChild(opt);
+                });
+            }
+        });
 
         // Charger projets dans filtre
-    apiGet('projets.php').then(function(data) {
-        var sel = document.getElementById('filter-project');
-        if (sel && data) {
-            var projets = Array.isArray(data) ? data : [];
-            projets.forEach(function(p) {
-                var opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.name;
-                sel.appendChild(opt);
-            });
-        }
-    });
+        var filterSel = document.getElementById('filter-project');
+        clearSelectOptions(filterSel);
+        apiGet('projets.php').then(function(data) {
+            if (filterSel && data) {
+                var projets = Array.isArray(data) ? data : [];
+                projets.forEach(function(p) {
+                    var opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name;
+                    filterSel.appendChild(opt);
+                });
+            }
+        });
 
         loadTemps();
+
+        // Temps history filters
+        var tempsSearch = document.getElementById('temps-search');
+        bindOnce(tempsSearch, 'input', debounce(loadTemps, 300));
+        var tempsFilterProject = document.getElementById('filter-project');
+        bindOnce(tempsFilterProject, 'change', loadTemps);
 
         // Résumé
         apiGet('temps.php?action=month-total').then(function(data) {
             if (!data) return;
             setTextById('temps-month', formatHours(data.total || 0));
             setTextById('temps-total-month', formatHours(data.total || 0));
-        }).catch(function() {});
-
-        apiGet('temps.php?action=week-summary').then(function(data) {
-            if (!data) return;
-            setTextById('temps-week', formatHours(data.total_hours || 0));
-            if (data.week_start && data.week_end) {
-                setTextById('week-label', formatDate(data.week_start) + ' — ' + formatDate(data.week_end));
-            }
         }).catch(function() {});
 
         // Calculer les heures restantes (enveloppe contrat)
@@ -1266,17 +1470,45 @@ function initTemps() {
         }).catch(function() {});
 
         // Week navigation
-        var currentWeekStart = null;
+        var currentWeekStart = getMonday(new Date());
+
+        function getMonday(d) {
+            var dt = new Date(d);
+            var day = dt.getDay();
+            var diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+            dt.setDate(diff);
+            return dt;
+        }
+
+        function toISODate(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function loadWeekSummary() {
+            var weekStartStr = toISODate(currentWeekStart);
+            apiGet('temps.php?action=week-summary&week_start=' + weekStartStr).then(function(data) {
+                if (!data) return;
+                setTextById('temps-week', formatHours(data.total_hours || 0));
+                if (data.week_start && data.week_end) {
+                    setTextById('week-label', formatDate(data.week_start) + ' — ' + formatDate(data.week_end));
+                }
+            }).catch(function() {});
+        }
+
+        loadWeekSummary();
+
         var prevBtn = document.getElementById('week-prev');
         var nextBtn = document.getElementById('week-next');
         if (prevBtn) {
             prevBtn.addEventListener('click', function() {
-                // Navigate previous week (simplified)
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+                loadWeekSummary();
             });
         }
         if (nextBtn) {
             nextBtn.addEventListener('click', function() {
-                // Navigate next week (simplified)
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                loadWeekSummary();
             });
         }
 
@@ -1326,198 +1558,62 @@ function initTemps() {
             });
         }
     }
-function loadTemps() {
-    var params = [];
-    
-    // Récupérer les valeurs des filtres
-    var search = document.getElementById('temps-search');
-    if (search && search.value) {
-        params.push('search=' + encodeURIComponent(search.value));
-    }
-    
-    var filterProject = document.getElementById('filter-project');
-    if (filterProject && filterProject.value) {
-        params.push('project_id=' + encodeURIComponent(filterProject.value));
-    }
 
-    var url = 'temps.php' + (params.length ? '?' + params.join('&') : '');
-    
-    apiGet(url).then(function(entries) {
-        var tbody = document.getElementById('temps-tbody');
-        var countEl = document.getElementById('temps-count');
-        
-        if (!tbody) return;
+    function loadTemps() {
+        var params = [];
+        var tempsSearch = document.getElementById('temps-search');
+        var filterProject = document.getElementById('filter-project');
+        if (filterProject && filterProject.value) params.push('project_id=' + encodeURIComponent(filterProject.value));
 
-        if (!entries || !entries.length) {
-            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucune entrée de temps.</td></tr>';
-            if (countEl) countEl.textContent = '0';
-            return;
-        }
+        var url = 'temps.php' + (params.length ? '?' + params.join('&') : '');
 
-        if (countEl) countEl.textContent = entries.length;
+        apiGet(url).then(function(entries) {
+            var tbody = document.getElementById('temps-tbody');
+            if (!tbody) return;
 
-        var html = '';
-        var totalHours = 0;
-        
-        entries.forEach(function(e, index) {
-            totalHours += parseFloat(e.hours || 0);
-            
-            html += '<tr class="time-row" data-project="' + (e.project_id || '') + '" data-row-index="' + index + '">';
-            html += '<td>' + formatDate(e.date) + '</td>';
-            html += '<td>' + esc(e.user_name || '—') + '</td>';
-            html += '<td>';
-            if (e.ticket_id) {
-                html += '<a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">#' + e.ticket_id + '</a>';
-            } else {
-                html += '—';
+            // Client-side search filter (API doesn't support text search for temps)
+            if (tempsSearch && tempsSearch.value) {
+                var q = tempsSearch.value.toLowerCase();
+                entries = (entries || []).filter(function(e) {
+                    return (e.ticket_title || '').toLowerCase().indexOf(q) !== -1
+                        || (e.project_name || '').toLowerCase().indexOf(q) !== -1
+                        || (e.user_name || '').toLowerCase().indexOf(q) !== -1
+                        || (e.description || '').toLowerCase().indexOf(q) !== -1;
+                });
             }
-            html += '</td>';
-            html += '<td>' + esc(e.project_name || '—') + '</td>';
-            html += '<td>' + formatHours(e.hours) + '</td>';
-            html += '<td>' + esc(e.description || '—') + '</td>';
-            html += '<td>';
-            
-            // Actions (seulement pour l'utilisateur qui a créé l'entrée ou admin)
-            if (CFG.user && (CFG.user.role === 'admin' || CFG.user.id == e.user_id)) {
-                html += '<button type="button" class="btn btn-icon btn-danger btn-small" onclick="deleteTimeEntry(' + e.id + ')" title="Supprimer">';
-                html += '🗑️</button>';
+
+            if (!entries || !entries.length) {
+                tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucune entrée de temps.</td></tr>';
+                return;
             }
-            
-            html += '</td>';
-            html += '</tr>';
+            var html = '';
+            entries.forEach(function(e, index) {
+                html += '<tr class="time-row" data-project="' + (e.project_id || '') + '" data-row-index="' + index + '">';
+                html += '<td>' + formatDate(e.date) + '</td>';
+                html += '<td>' + esc(e.user_name || '—') + '</td>';
+                html += '<td><a href="' + appUrl('ticket-detail?id=' + e.ticket_id) + '">' + esc(e.ticket_title || ('#' + e.ticket_id)) + '</a></td>';
+                html += '<td>' + esc(e.project_name || '—') + '</td>';
+                html += '<td>' + formatHours(e.hours) + '</td>';
+                html += '<td>' + esc(e.description || '—') + '</td>';
+                html += '<td>';
+                html += '<button class="btn btn-text btn-small btn-danger" onclick="deleteTemps(' + e.id + ')">Supprimer</button>';
+                html += '</td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+            applyDynamicRoles();
+        }).catch(function() {
+            var tbody = document.getElementById('temps-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Erreur de chargement.</td></tr>';
         });
+    }
 
-        tbody.innerHTML = html;
-
-        // Mettre à jour le total
-        var totalEl = document.getElementById('temps-total-month');
-        if (totalEl) {
-            totalEl.textContent = formatHours(totalHours);
-        }
-
-    }).catch(function(err) {
-        var tbody = document.getElementById('temps-tbody');
-        if (tbody) {
-            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Erreur de chargement.</td></tr>';
-        }
-    });
-}
     window.deleteTemps = function(id) {
         if (confirm('Supprimer cette entrée ?')) {
             apiDelete('temps.php?id=' + id).then(function() { loadTemps(); });
         }
     };
-function deleteTimeEntry(id) {
-    if (!confirm('Supprimer cette entrée de temps ?')) return;
-    
-    apiDelete('temps.php?id=' + id).then(function() {
-        loadTemps(); // Recharger la liste
-        
-        // Recharger aussi les totaux
-        apiGet('temps.php?action=month-total').then(function(data) {
-            if (!data) return;
-            setTextById('temps-month', formatHours(data.total || 0));
-            setTextById('temps-total-month', formatHours(data.total || 0));
-        });
-    }).catch(function(err) {
-        alert('Erreur lors de la suppression: ' + err.message);
-    });
-}
 
-function loadUsers() {
-    var params = [];
-    
-    // Récupérer les valeurs des filtres
-    var search = document.getElementById('user-search');
-    if (search && search.value) {
-        params.push('search=' + encodeURIComponent(search.value));
-    }
-    
-    var filterRole = document.getElementById('filter-role');
-    if (filterRole && filterRole.value) {
-        params.push('role=' + encodeURIComponent(filterRole.value));
-    }
-    
-    var filterStatus = document.getElementById('filter-status');
-    if (filterStatus && filterStatus.value) {
-        params.push('status=' + encodeURIComponent(filterStatus.value));
-    }
-
-    var url = 'users.php' + (params.length ? '?' + params.join('&') : '');
-    
-    apiGet(url).then(function(users) {
-        var tbody = document.getElementById('users-tbody');
-        var countEl = document.getElementById('users-count');
-        
-        if (!tbody) return;
-
-        if (!users || !users.length) {
-            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Aucun utilisateur.</td></tr>';
-            if (countEl) countEl.textContent = '0';
-            return;
-        }
-
-        if (countEl) countEl.textContent = users.length;
-
-        var html = '';
-        users.forEach(function(u, index) {
-            var status = u.status || 'active';
-            var role = u.role || 'client';
-            
-            html += '<tr class="user-row" data-role="' + esc(role) + '" data-status="' + esc(status) + '" data-row-index="' + index + '">';
-            
-            // Utilisateur (nom + prénom)
-            html += '<td>';
-            html += '<div class="user-cell">';
-            html += '<strong>' + esc(u.first_name + ' ' + u.last_name) + '</strong>';
-            if (u.company) {
-                html += '<span class="user-company">' + esc(u.company) + '</span>';
-            }
-            html += '</div>';
-            html += '</td>';
-            
-            // Email
-            html += '<td><a href="mailto:' + esc(u.email) + '">' + esc(u.email) + '</a></td>';
-            
-            // Téléphone
-            html += '<td>' + esc(u.phone || '—') + '</td>';
-            
-            // Rôle
-            html += '<td><span class="badge badge-' + esc(role) + '">' + getRoleLabel(role) + '</span></td>';
-            
-            // Statut
-            var statusClass = status === 'active' ? 'success' : 'secondary';
-            var statusLabel = status === 'active' ? 'Actif' : 'Inactif';
-            html += '<td><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></td>';
-            
-            // Dernière connexion
-            html += '<td>' + (u.last_login ? formatDate(u.last_login) : '—') + '</td>';
-            
-            // Actions
-            html += '<td>';
-            html += '<a href="' + appUrl('user-form?id=' + u.id) + '" class="btn btn-icon btn-small" title="Modifier">✏️</a>';
-            html += '</td>';
-            
-            html += '</tr>';
-        });
-
-        tbody.innerHTML = html;
-
-    }).catch(function(err) {
-        var tbody = document.getElementById('users-tbody');
-        if (tbody) {
-            tbody.innerHTML = '<tr class="table-empty-row"><td colspan="7">Erreur de chargement.</td></tr>';
-        }
-    });
-}
-function getRoleLabel(role) {
-    var labels = {
-        'admin': 'Administrateur',
-        'collaborateur': 'Collaborateur',
-        'client': 'Client'
-    };
-    return labels[role] || role;
-}
       // PAGE: VALIDATION
   
     function initValidation() {
@@ -1753,25 +1849,27 @@ function getRoleLabel(role) {
         if (document.body.getAttribute('data-page') !== 'rapports') return;
 
         // Load filter selects
+        var projSel = document.getElementById('report-project');
+        clearSelectOptions(projSel);
         apiGet('projets.php').then(function(data) {
-            var sel = document.getElementById('report-project');
-            if (sel && data) {
+            if (projSel && data) {
                 (Array.isArray(data) ? data : []).forEach(function(p) {
                     var opt = document.createElement('option');
                     opt.value = p.id;
                     opt.textContent = p.name;
-                    sel.appendChild(opt);
+                    projSel.appendChild(opt);
                 });
             }
         });
+        var clientSel = document.getElementById('report-client');
+        clearSelectOptions(clientSel);
         apiGet('users.php?action=clients').then(function(data) {
-            var sel = document.getElementById('report-client');
-            if (sel && data) {
+            if (clientSel && data) {
                 (Array.isArray(data) ? data : []).forEach(function(c) {
                     var opt = document.createElement('option');
                     opt.value = c.id;
                     opt.textContent = c.first_name + ' ' + c.last_name;
-                    sel.appendChild(opt);
+                    clientSel.appendChild(opt);
                 });
             }
         });

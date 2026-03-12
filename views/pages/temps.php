@@ -85,7 +85,7 @@
         <h2>Historique des entrées</h2>
     </div>
 
-    <section class="filters-section">
+    <section class="filters-section" data-server-filter>
         <div class="filters-bar">
             <input type="search" placeholder="Rechercher..." class="search-input" id="temps-search">
             <select class="filter-select" id="filter-project" data-filter="project">

@@ -41,7 +41,7 @@
 </section>
 
 <!-- Filtres -->
-<section class="filters-section">
+<section class="filters-section" data-server-filter>
     <div class="filters-bar">
         <input type="search" placeholder="Rechercher un projet..." class="search-input" id="projet-search">
         <select class="filter-select" id="filter-client" data-filter="client">

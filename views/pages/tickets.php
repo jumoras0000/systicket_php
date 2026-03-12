@@ -48,7 +48,7 @@ $role = Auth::role();
 </section>
 
 <!-- Filtres -->
-<section class="filters-section">
+<section class="filters-section" data-server-filter>
     <div class="filters-bar">
         <input type="search" placeholder="Rechercher un ticket..." class="search-input" id="ticket-search" aria-label="Recherche">
         <select class="filter-select" id="filter-status" data-filter="status" aria-label="Filtrer par statut">

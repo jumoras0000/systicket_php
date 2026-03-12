@@ -144,5 +144,5 @@
     } else {
         init();
     }
-    window.addEventListener('systicket:contentLoaded', init);
+    document.addEventListener('systicket:contentLoaded', init);
 })();

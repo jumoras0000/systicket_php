@@ -78,7 +78,6 @@
     </p>
 </section>
 
-<script src="<?= asset('js/rapports-export.js') ?>"></script>
 
 <!-- Résumé exécutif -->
 <section class="reports-executive card" aria-label="Résumé du rapport">
@@ -92,7 +91,7 @@
 <section id="report-summary" class="reports-section" aria-labelledby="report-summary-title">
     <header class="reports-section-header">
         <h2 id="report-summary-title" class="section-title">Synthèse</h2>
-        <button type="button" class="btn btn-text btn-small">Exporter cette section</button>
+        <button type="button" class="btn btn-text btn-small section-export-btn" data-target="report-summary">Exporter cette section</button>
     </header>
     <div class="stats-grid stats-grid-reports" id="report-kpis">
         <a href="<?= url('tickets') ?>" class="stat-card stat-card-blue stat-card-link" title="Voir les tickets">

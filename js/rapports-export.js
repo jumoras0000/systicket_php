@@ -1,6 +1,8 @@
 (function(){
     'use strict';
 
+    var _exportBound = new WeakSet();
+
     function downloadBlob(filename, blob) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -138,7 +140,8 @@
 
     function init() {
         var mainBtn = document.getElementById('export-btn');
-        if (mainBtn) {
+        if (mainBtn && !_exportBound.has(mainBtn)) {
+            _exportBound.add(mainBtn);
             mainBtn.addEventListener('click', function() {
                 createMenu(mainBtn, [
                     { label: 'Exporter en PDF', action: function(){ exportReportPdf(); } },
@@ -148,8 +151,10 @@
             });
         }
 
-        // Section export buttons
+        // Section export buttons (on all pages)
         document.querySelectorAll('.section-export-btn').forEach(function(btn){
+            if (_exportBound.has(btn)) return;
+            _exportBound.add(btn);
             btn.addEventListener('click', function(){
                 var target = btn.getAttribute('data-target');
                 createMenu(btn, [
@@ -162,4 +167,6 @@
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    // Re-init after SPA navigation to bind new export buttons
+    document.addEventListener('systicket:contentLoaded', init);
 })();

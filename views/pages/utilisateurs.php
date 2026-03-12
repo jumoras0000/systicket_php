@@ -24,7 +24,7 @@
 </section>
 
 <!-- Filtres -->
-<section class="filters-section">
+<section class="filters-section" data-server-filter>
     <div class="filters-bar">
         <input type="search" placeholder="Rechercher un utilisateur..." class="search-input" id="user-search">
         <select class="filter-select" id="filter-role" data-filter="role">
@@ -38,6 +38,13 @@
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
         </select>
+    </div>
+</section>
+
+<!-- Barre d'outils -->
+<section class="list-toolbar" aria-label="Barre d'outils">
+    <div class="list-toolbar-left">
+        <span class="list-results-count"><strong id="users-count">0</strong> utilisateur(s)</span>
     </div>
 </section>
 
@@ -62,5 +69,10 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="pagination" id="users-pagination">
+        <button type="button" class="btn btn-text pagination-prev" disabled>Précédent</button>
+        <span class="pagination-info">Page 1 sur 1</span>
+        <button type="button" class="btn btn-text pagination-next" disabled>Suivant</button>
     </div>
 </section>

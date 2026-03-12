@@ -29,6 +29,19 @@
     </article>
 </section>
 
+<!-- Filtres -->
+<section class="filters-section" data-server-filter>
+    <div class="filters-bar">
+        <input type="search" placeholder="Rechercher un contrat..." class="search-input" id="contrat-search" aria-label="Recherche">
+        <select class="filter-select" id="filter-status" data-filter="status" aria-label="Filtrer par statut">
+            <option value="">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="expired">Expiré</option>
+            <option value="cancelled">Annulé</option>
+        </select>
+    </div>
+</section>
+
 <!-- Barre d'outils -->
 <section class="list-toolbar" aria-label="Barre d'outils">
     <div class="list-toolbar-left">
@@ -63,5 +76,10 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="pagination" id="contrats-pagination">
+        <button type="button" class="btn btn-text pagination-prev" disabled>Précédent</button>
+        <span class="pagination-info">Page 1 sur 1</span>
+        <button type="button" class="btn btn-text pagination-next" disabled>Suivant</button>
     </div>
 </section>
