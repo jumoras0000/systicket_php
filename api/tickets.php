@@ -116,6 +116,28 @@ switch ($method) {
             jsonResponse(['error' => 'Non autorisé'], 403);
         }
 
+        // Ajouter un assigné
+        if ($action === 'add-assignee' && !empty($_GET['id'])) {
+            $data = jsonInput();
+            if (empty($data['user_id'])) {
+                jsonResponse(['error' => 'user_id requis'], 400);
+            }
+            $model->addAssignee((int)$_GET['id'], (int)$data['user_id']);
+            $assignees = $model->getAssignees((int)$_GET['id']);
+            jsonResponse(['success' => true, 'data' => $assignees]);
+        }
+
+        // Retirer un assigné
+        if ($action === 'remove-assignee' && !empty($_GET['id'])) {
+            $data = jsonInput();
+            if (empty($data['user_id'])) {
+                jsonResponse(['error' => 'user_id requis'], 400);
+            }
+            $model->removeAssignee((int)$_GET['id'], (int)$data['user_id']);
+            $assignees = $model->getAssignees((int)$_GET['id']);
+            jsonResponse(['success' => true, 'data' => $assignees]);
+        }
+
         $data = jsonInput();
         $data['created_by'] = Auth::id();
         

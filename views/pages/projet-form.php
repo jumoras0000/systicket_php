@@ -79,10 +79,14 @@ $title = $isEdit ? 'Modifier le projet' : 'Créer un nouveau projet';
 
         <div class="form-row">
             <div class="form-group">
-                <label for="project-assignees" class="form-label">Collaborateurs assignés</label>
-                <select id="project-assignees" name="assignees[]" class="form-select" multiple>
-                </select>
-                <small class="form-help">Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs</small>
+                <label for="project-assignees-search" class="form-label">Collaborateurs assignés</label>
+                <div class="tag-picker" id="project-assignees-picker">
+                    <div class="tag-picker-tags" id="project-assignees-tags"></div>
+                    <select id="project-assignees-search" class="form-select tag-picker-select">
+                        <option value="">+ Ajouter un collaborateur</option>
+                    </select>
+                </div>
+                <input type="hidden" id="project-assignees" name="assignees_json" value="[]">
             </div>
         </div>
 

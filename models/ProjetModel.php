@@ -124,6 +124,19 @@ class ProjetModel {
         }
     }
 
+    public function addAssignee(int $projetId, int $userId): bool {
+        $check = $this->db->prepare('SELECT COUNT(*) FROM projet_user WHERE projet_id = ? AND user_id = ?');
+        $check->execute([$projetId, $userId]);
+        if ((int)$check->fetchColumn() > 0) return false;
+        $stmt = $this->db->prepare('INSERT INTO projet_user (projet_id, user_id) VALUES (?, ?)');
+        return $stmt->execute([$projetId, $userId]);
+    }
+
+    public function removeAssignee(int $projetId, int $userId): bool {
+        $stmt = $this->db->prepare('DELETE FROM projet_user WHERE projet_id = ? AND user_id = ?');
+        return $stmt->execute([$projetId, $userId]);
+    }
+
     public function getTickets(int $projetId): array {
         $stmt = $this->db->prepare('SELECT t.*, 
             COALESCE(SUM(te.hours), 0) as spent_hours

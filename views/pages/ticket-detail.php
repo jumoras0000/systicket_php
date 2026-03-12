@@ -108,7 +108,11 @@ $role = Auth::role();
                     <span>—</span>
                 </div>
             </div>
-            <a href="<?= url('utilisateurs') ?>" class="btn btn-text btn-small btn-manage-users role-admin-only">+ Assigner</a>
+            <div class="role-admin-collaborateur mt-sm" id="add-assignee-wrap">
+                <select class="form-select" id="add-assignee-select">
+                    <option value="">+ Ajouter un collaborateur</option>
+                </select>
+            </div>
         </div>
 
         <div class="info-card role-admin-collaborateur">

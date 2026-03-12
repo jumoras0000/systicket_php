@@ -492,6 +492,67 @@
         if (typeof window.TICKET_ID === 'undefined' || !window.TICKET_ID) return;
 
         var id = window.TICKET_ID;
+        var allCollaborateurs = [];
+        var currentAssignees = [];
+        var userRole = (CFG.user && CFG.user.role) || CFG.role || 'client';
+        var canManageAssignees = (userRole === 'admin' || userRole === 'collaborateur');
+
+        function renderAssignees(assignees) {
+            currentAssignees = assignees || [];
+            var container = document.getElementById('ticket-assignees');
+            if (!container) return;
+            if (!currentAssignees.length) {
+                container.innerHTML = '<div class="assignee-item"><span class="text-secondary">Aucun assigné</span></div>';
+            } else {
+                var ahtml = '';
+                currentAssignees.forEach(function(u) {
+                    ahtml += '<div class="assignee-item">'
+                        + '<span>' + esc(u.first_name + ' ' + u.last_name) + '</span>';
+                    if (canManageAssignees) {
+                        ahtml += '<button type="button" class="btn-danger-icon btn-remove-assignee" data-user-id="' + u.id + '" title="Retirer">✕</button>';
+                    }
+                    ahtml += '</div>';
+                });
+                container.innerHTML = ahtml;
+            }
+            updateAssigneeSelect();
+            bindRemoveAssigneeButtons();
+        }
+
+        function updateAssigneeSelect() {
+            var sel = document.getElementById('add-assignee-select');
+            if (!sel) return;
+            var assignedIds = currentAssignees.map(function(u) { return u.id; });
+            var html = '<option value="">+ Ajouter un collaborateur</option>';
+            allCollaborateurs.forEach(function(c) {
+                if (assignedIds.indexOf(c.id) === -1) {
+                    html += '<option value="' + c.id + '">' + esc(c.first_name + ' ' + c.last_name) + '</option>';
+                }
+            });
+            sel.innerHTML = html;
+        }
+
+        function bindRemoveAssigneeButtons() {
+            var container = document.getElementById('ticket-assignees');
+            if (!container) return;
+            container.querySelectorAll('.btn-remove-assignee').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var userId = parseInt(this.getAttribute('data-user-id'));
+                    if (!userId) return;
+                    apiPost('tickets.php?id=' + id + '&action=remove-assignee', { user_id: userId })
+                        .then(function(resp) {
+                            var data = resp && resp.data ? resp.data : [];
+                            renderAssignees(data);
+                        })
+                        .catch(function(err) { alert(err.message || 'Erreur'); });
+                });
+            });
+        }
+
+        // Load collaborators for the dropdown
+        apiGet('users.php?action=collaborateurs').then(function(collabs) {
+            allCollaborateurs = collabs || [];
+        }).catch(function() {});
 
         apiGet('tickets.php?id=' + id).then(function(t) {
             if (!t) return;
@@ -512,17 +573,8 @@
             setHtmlById('ticket-time-estimated', '<strong>Temps estimé :</strong> ' + formatHours(t.estimated_hours || 0));
             document.title = 'Ticket #' + t.id + ' - Systicket';
 
-            // Assignées inline
-            if (t.assignees && t.assignees.length) {
-                var container = document.getElementById('ticket-assignees');
-                if (container) {
-                    var ahtml = '';
-                    t.assignees.forEach(function(u) {
-                        ahtml += '<div class="assignee-item"><span>' + esc(u.first_name + ' ' + u.last_name) + '</span></div>';
-                    });
-                    container.innerHTML = ahtml;
-                }
-            }
+            // Assignées
+            renderAssignees(t.assignees || []);
 
             // Comments inline
             if (t.comments) {
@@ -534,6 +586,22 @@
                 renderTimeEntries(t.time_entries);
             }
         }).catch(function() {});
+
+        // Add assignee on select change
+        var addSel = document.getElementById('add-assignee-select');
+        if (addSel) {
+            addSel.addEventListener('change', function() {
+                var userId = parseInt(this.value);
+                if (!userId) return;
+                this.value = '';
+                apiPost('tickets.php?id=' + id + '&action=add-assignee', { user_id: userId })
+                    .then(function(resp) {
+                        var data = resp && resp.data ? resp.data : [];
+                        renderAssignees(data);
+                    })
+                    .catch(function(err) { alert(err.message || 'Erreur'); });
+            });
+        }
 
         // Formulaire commentaire
         var commentForm = document.getElementById('comment-form');
@@ -633,19 +701,62 @@
             }
         });
 
-        var assignSel = document.getElementById('ticket-assignees');
-        var collabsLoaded = apiGet('users.php?action=collaborateurs').then(function(data) {
-            if (assignSel && data) {
-                assignSel.innerHTML = '';
-                var users = Array.isArray(data) ? data : [];
-                users.forEach(function(u) {
-                    var opt = document.createElement('option');
-                    opt.value = u.id;
-                    opt.textContent = u.first_name + ' ' + u.last_name;
-                    assignSel.appendChild(opt);
+        var assignSel = document.getElementById('ticket-assignees-search');
+        var allTicketCollabs = [];
+        var selectedTicketAssignees = [];
+
+        function renderTicketFormTags() {
+            var tagsContainer = document.getElementById('ticket-assignees-tags');
+            if (!tagsContainer) return;
+            var html = '';
+            selectedTicketAssignees.forEach(function(u) {
+                html += '<span class="tag-chip" data-id="' + u.id + '">' + esc(u.first_name + ' ' + u.last_name) + '<button type="button" class="tag-chip-remove" data-id="' + u.id + '">✕</button></span>';
+            });
+            tagsContainer.innerHTML = html;
+            tagsContainer.querySelectorAll('.tag-chip-remove').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var uid = parseInt(this.getAttribute('data-id'));
+                    selectedTicketAssignees = selectedTicketAssignees.filter(function(u) { return u.id !== uid; });
+                    renderTicketFormTags();
+                    updateTicketFormSelect();
                 });
+            });
+            var hidden = document.getElementById('ticket-assignees');
+            if (hidden) hidden.value = JSON.stringify(selectedTicketAssignees.map(function(u) { return u.id; }));
+        }
+
+        function updateTicketFormSelect() {
+            if (!assignSel) return;
+            var ids = selectedTicketAssignees.map(function(u) { return u.id; });
+            var html = '<option value="">+ Ajouter un collaborateur</option>';
+            allTicketCollabs.forEach(function(u) {
+                if (ids.indexOf(u.id) === -1) {
+                    html += '<option value="' + u.id + '">' + esc(u.first_name + ' ' + u.last_name) + '</option>';
+                }
+            });
+            assignSel.innerHTML = html;
+        }
+
+        var collabsLoaded = apiGet('users.php?action=collaborateurs').then(function(data) {
+            if (data) {
+                allTicketCollabs = Array.isArray(data) ? data : [];
+                updateTicketFormSelect();
             }
         });
+
+        if (assignSel) {
+            assignSel.addEventListener('change', function() {
+                var uid = parseInt(this.value);
+                if (!uid) return;
+                var user = allTicketCollabs.find(function(u) { return u.id === uid; });
+                if (user && !selectedTicketAssignees.some(function(u) { return u.id === uid; })) {
+                    selectedTicketAssignees.push(user);
+                    renderTicketFormTags();
+                    updateTicketFormSelect();
+                }
+                this.value = '';
+            });
+        }
 
         // Si édition ou duplication, attendre que les selects soient remplis AVANT de sélectionner les valeurs
         var loadId = entityId || duplicateId;
@@ -666,15 +777,13 @@
                 // Type radio
                 var radios = form.querySelectorAll('input[name="type"]');
                 radios.forEach(function(r) { r.checked = (r.value === t.type); });
-                // Assignees (les options sont déjà chargées grâce à Promise.all)
-                if (t.assignees) {
-                    var sel = document.getElementById('ticket-assignees');
-                    if (sel) {
-                        t.assignees.forEach(function(a) {
-                            var opt = sel.querySelector('option[value="' + a.id + '"]');
-                            if (opt) opt.selected = true;
-                        });
-                    }
+                // Assignees (tag picker pre-selection)
+                if (t.assignees && t.assignees.length) {
+                    selectedTicketAssignees = t.assignees.map(function(a) {
+                        return { id: a.id, first_name: a.first_name, last_name: a.last_name };
+                    });
+                    renderTicketFormTags();
+                    updateTicketFormSelect();
                 }
             });
         }
@@ -686,13 +795,17 @@
             var formData = new FormData(form);
             var data = {};
             formData.forEach(function(val, key) {
-                if (key === 'assignees[]') {
-                    if (!data.assignees) data.assignees = [];
-                    data.assignees.push(val);
+                if (key === 'assignees[]' || key === 'assignees_json') {
+                    // skip, handled below
                 } else {
                     data[key] = val;
                 }
             });
+            // Get assignees from hidden input
+            var hiddenAssignees = document.getElementById('ticket-assignees');
+            if (hiddenAssignees) {
+                try { data.assignees = JSON.parse(hiddenAssignees.value); } catch(e) { data.assignees = []; }
+            }
 
         
             data = mapFormData('ticket', data);
@@ -834,6 +947,78 @@
     function initProjetDetail() {
         if (typeof window.PROJET_ID === 'undefined' || !window.PROJET_ID) return;
         var id = window.PROJET_ID;
+        var allCollabsProjet = [];
+        var currentProjetAssignees = [];
+        var userRolePD = (CFG.user && CFG.user.role) || CFG.role || 'client';
+        var canManagePD = (userRolePD === 'admin' || userRolePD === 'collaborateur');
+
+        function renderProjetAssignees(assignees) {
+            currentProjetAssignees = assignees || [];
+            var container = document.getElementById('projet-assignees');
+            if (!container) return;
+            if (!currentProjetAssignees.length) {
+                container.innerHTML = '<div class="assignee-item"><span class="text-secondary">Aucun collaborateur assigné</span></div>';
+            } else {
+                var ahtml = '';
+                currentProjetAssignees.forEach(function(u) {
+                    ahtml += '<div class="assignee-item"><span>' + esc(u.first_name + ' ' + u.last_name) + '</span>';
+                    if (canManagePD) {
+                        ahtml += '<button type="button" class="btn-danger-icon btn-remove-projet-assignee" data-user-id="' + u.id + '" title="Retirer">✕</button>';
+                    }
+                    ahtml += '</div>';
+                });
+                container.innerHTML = ahtml;
+            }
+            updateProjetAssigneeSelect();
+            bindRemoveProjetAssigneeButtons();
+        }
+
+        function updateProjetAssigneeSelect() {
+            var sel = document.getElementById('add-projet-assignee-select');
+            if (!sel) return;
+            var assignedIds = currentProjetAssignees.map(function(u) { return u.id; });
+            var html = '<option value="">+ Ajouter un collaborateur</option>';
+            allCollabsProjet.forEach(function(c) {
+                if (assignedIds.indexOf(c.id) === -1) {
+                    html += '<option value="' + c.id + '">' + esc(c.first_name + ' ' + c.last_name) + '</option>';
+                }
+            });
+            sel.innerHTML = html;
+        }
+
+        function bindRemoveProjetAssigneeButtons() {
+            var container = document.getElementById('projet-assignees');
+            if (!container) return;
+            container.querySelectorAll('.btn-remove-projet-assignee').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var userId = parseInt(this.getAttribute('data-user-id'));
+                    if (!userId) return;
+                    apiPost('projets.php?id=' + id + '&action=remove-assignee', { user_id: userId })
+                        .then(function(resp) {
+                            renderProjetAssignees(resp && resp.data ? resp.data : []);
+                        })
+                        .catch(function(err) { alert(err.message || 'Erreur'); });
+                });
+            });
+        }
+
+        apiGet('users.php?action=collaborateurs').then(function(collabs) {
+            allCollabsProjet = collabs || [];
+        }).catch(function() {});
+
+        var addSelPD = document.getElementById('add-projet-assignee-select');
+        if (addSelPD) {
+            addSelPD.addEventListener('change', function() {
+                var userId = parseInt(this.value);
+                if (!userId) return;
+                this.value = '';
+                apiPost('projets.php?id=' + id + '&action=add-assignee', { user_id: userId })
+                    .then(function(resp) {
+                        renderProjetAssignees(resp && resp.data ? resp.data : []);
+                    })
+                    .catch(function(err) { alert(err.message || 'Erreur'); });
+            });
+        }
 
         apiGet('projets.php?id=' + id).then(function(p) {
             if (!p) return;
@@ -848,17 +1033,8 @@
             setTextById('projet-created', formatDate(p.created_at));
             document.title = (p.name || 'Projet') + ' - Systicket';
 
-            // Assignées inline
-            if (p.assignees && p.assignees.length) {
-                var container = document.getElementById('projet-assignees');
-                if (container) {
-                    var ahtml = '';
-                    p.assignees.forEach(function(u) {
-                        ahtml += '<div class="assignee-item"><span>' + esc(u.first_name + ' ' + u.last_name) + '</span></div>';
-                    });
-                    container.innerHTML = ahtml;
-                }
-            }
+            // Assignées
+            renderProjetAssignees(p.assignees || []);
 
             // Tickets inline
             if (p.tickets && p.tickets.length) {
@@ -937,22 +1113,73 @@
             }
         });
 
-        var assignSelPF = document.getElementById('project-assignees');
+        var assignSelPF = document.getElementById('project-assignees-search');
+        var allProjectCollabs = [];
+        var selectedProjectAssignees = [];
         var mgrSelPF = document.getElementById('project-manager');
-        if (assignSelPF) assignSelPF.innerHTML = '';
         clearSelectOptions(mgrSelPF);
+
+        function renderProjectFormTags() {
+            var tagsContainer = document.getElementById('project-assignees-tags');
+            if (!tagsContainer) return;
+            var html = '';
+            selectedProjectAssignees.forEach(function(u) {
+                html += '<span class="tag-chip" data-id="' + u.id + '">' + esc(u.first_name + ' ' + u.last_name) + '<button type="button" class="tag-chip-remove" data-id="' + u.id + '">✕</button></span>';
+            });
+            tagsContainer.innerHTML = html;
+            tagsContainer.querySelectorAll('.tag-chip-remove').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var uid = parseInt(this.getAttribute('data-id'));
+                    selectedProjectAssignees = selectedProjectAssignees.filter(function(u) { return u.id !== uid; });
+                    renderProjectFormTags();
+                    updateProjectFormSelect();
+                });
+            });
+            var hidden = document.getElementById('project-assignees');
+            if (hidden) hidden.value = JSON.stringify(selectedProjectAssignees.map(function(u) { return u.id; }));
+        }
+
+        function updateProjectFormSelect() {
+            if (!assignSelPF) return;
+            var ids = selectedProjectAssignees.map(function(u) { return u.id; });
+            var html = '<option value="">+ Ajouter un collaborateur</option>';
+            allProjectCollabs.forEach(function(u) {
+                if (ids.indexOf(u.id) === -1) {
+                    html += '<option value="' + u.id + '">' + esc(u.first_name + ' ' + u.last_name) + '</option>';
+                }
+            });
+            assignSelPF.innerHTML = html;
+        }
+
         var collabsLoaded = apiGet('users.php?action=collaborateurs').then(function(data) {
             if (data) {
-                var users = Array.isArray(data) ? data : [];
+                allProjectCollabs = Array.isArray(data) ? data : [];
+                updateProjectFormSelect();
+                var users = allProjectCollabs;
                 users.forEach(function(u) {
-                    var opt = document.createElement('option');
-                    opt.value = u.id;
-                    opt.textContent = u.first_name + ' ' + u.last_name;
-                    if (assignSelPF) assignSelPF.appendChild(opt);
-                    if (mgrSelPF) mgrSelPF.appendChild(opt.cloneNode(true));
+                    if (mgrSelPF) {
+                        var opt = document.createElement('option');
+                        opt.value = u.id;
+                        opt.textContent = u.first_name + ' ' + u.last_name;
+                        mgrSelPF.appendChild(opt);
+                    }
                 });
             }
         });
+
+        if (assignSelPF) {
+            assignSelPF.addEventListener('change', function() {
+                var uid = parseInt(this.value);
+                if (!uid) return;
+                var user = allProjectCollabs.find(function(u) { return u.id === uid; });
+                if (user && !selectedProjectAssignees.some(function(u) { return u.id === uid; })) {
+                    selectedProjectAssignees.push(user);
+                    renderProjectFormTags();
+                    updateProjectFormSelect();
+                }
+                this.value = '';
+            });
+        }
 
         if (entityId) {
             Promise.all([clientsLoaded, collabsLoaded]).then(function() {
@@ -967,15 +1194,13 @@
                 setFieldValue('project-status', p.status);
                 setFieldValue('project-manager', p.manager_id);
 
-                // Assignees
+                // Assignees (tag picker pre-selection)
                 if (p.assignees && p.assignees.length) {
-                    var sel = document.getElementById('project-assignees');
-                    if (sel) {
-                        p.assignees.forEach(function(a) {
-                            var opt = sel.querySelector('option[value="' + a.id + '"]');
-                            if (opt) opt.selected = true;
-                        });
-                    }
+                    selectedProjectAssignees = p.assignees.map(function(a) {
+                        return { id: a.id, first_name: a.first_name, last_name: a.last_name };
+                    });
+                    renderProjectFormTags();
+                    updateProjectFormSelect();
                 }
             });
         }
@@ -987,13 +1212,17 @@
             var formData = new FormData(form);
             var data = {};
             formData.forEach(function(val, key) {
-                if (key === 'assignees[]') {
-                    if (!data.assignees) data.assignees = [];
-                    data.assignees.push(val);
+                if (key === 'assignees[]' || key === 'assignees_json') {
+                    // skip, handled below
                 } else {
                     data[key] = val;
                 }
             });
+            // Get assignees from hidden input
+            var hiddenProjAssignees = document.getElementById('project-assignees');
+            if (hiddenProjAssignees) {
+                try { data.assignees = JSON.parse(hiddenProjAssignees.value); } catch(e) { data.assignees = []; }
+            }
 
             // Map French form field names to English API names
             data = mapFormData('projet', data);

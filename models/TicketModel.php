@@ -179,6 +179,19 @@ class TicketModel {
         }
     }
 
+    public function addAssignee(int $ticketId, int $userId): bool {
+        $check = $this->db->prepare('SELECT COUNT(*) FROM ticket_user WHERE ticket_id = ? AND user_id = ?');
+        $check->execute([$ticketId, $userId]);
+        if ((int)$check->fetchColumn() > 0) return false;
+        $stmt = $this->db->prepare('INSERT INTO ticket_user (ticket_id, user_id) VALUES (?, ?)');
+        return $stmt->execute([$ticketId, $userId]);
+    }
+
+    public function removeAssignee(int $ticketId, int $userId): bool {
+        $stmt = $this->db->prepare('DELETE FROM ticket_user WHERE ticket_id = ? AND user_id = ?');
+        return $stmt->execute([$ticketId, $userId]);
+    }
+
     public function getTimeEntries(int $ticketId): array {
         $stmt = $this->db->prepare('SELECT te.*, CONCAT(u.first_name, " ", u.last_name) as user_name
             FROM temps te LEFT JOIN users u ON te.user_id = u.id

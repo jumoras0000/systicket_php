@@ -75,7 +75,11 @@ $projetId = input('id', 0);
             <div class="assignees-list" id="projet-assignees">
                 <p class="text-secondary text-sm">Aucun collaborateur assigné.</p>
             </div>
-            <a href="<?= url('utilisateurs') ?>" class="btn btn-text btn-small btn-manage-users role-admin-only">+ Ajouter un collaborateur</a>
+            <div class="role-admin-collaborateur mt-sm" id="add-projet-assignee-wrap">
+                <select class="form-select" id="add-projet-assignee-select">
+                    <option value="">+ Ajouter un collaborateur</option>
+                </select>
+            </div>
         </section>
 
         <!-- Tickets du projet -->

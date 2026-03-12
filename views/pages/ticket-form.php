@@ -39,8 +39,7 @@ $title = $isEdit ? 'Éditer le ticket' : 'Créer un nouveau ticket';
                 <label for="ticket-description" class="form-label">
                     Description <span class="required">*</span>
                 </label>
-                <textarea id="ticket-description" name="description" class="form-textarea" rows="6" placeholder="Décrivez en détail le problème ou la demande..." required minlength="10"></textarea>
-                <small class="form-help">Minimum 10 caractères</small>
+                <textarea id="ticket-description" name="description" class="form-textarea" rows="6" placeholder="Décrivez en détail le problème ou la demande..." required></textarea>
             </div>
         </div>
 
@@ -88,11 +87,14 @@ $title = $isEdit ? 'Éditer le ticket' : 'Créer un nouveau ticket';
             </div>
 
             <div class="form-group">
-                <label for="ticket-assignees" class="form-label">Assigner à</label>
-                <select id="ticket-assignees" name="assignees[]" class="form-select" multiple>
-                    <option value="">Sélectionner un collaborateur</option>
-                </select>
-                <small class="form-help">Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs</small>
+                <label for="ticket-assignees-search" class="form-label">Assigner à</label>
+                <div class="tag-picker" id="ticket-assignees-picker">
+                    <div class="tag-picker-tags" id="ticket-assignees-tags"></div>
+                    <select id="ticket-assignees-search" class="form-select tag-picker-select">
+                        <option value="">+ Ajouter un collaborateur</option>
+                    </select>
+                </div>
+                <input type="hidden" id="ticket-assignees" name="assignees_json" value="[]">
             </div>
         </div>
 

@@ -38,7 +38,7 @@
                     <?php if (Auth::check()): ?>
                         <a href="<?= url('dashboard') ?>" class="btn btn-primary btn-lg">Accéder au tableau de bord</a>
                     <?php else: ?>
-                        <a href="<?= url('inscription') ?>" class="btn btn-primary btn-lg">Commencer gratuitement</a>
+                        <a href="<?= url('inscription') ?>" class="btn btn-primary btn-lg">Commencer </a>
                         <a href="<?= url('connexion') ?>" class="btn btn-secondary btn-lg">Se connecter</a>
                     <?php endif; ?>
                 </div>
